@@ -195,6 +195,31 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
   .stat-n{font-size:18px}
   .form-row{grid-template-columns:1fr}
 }
+
+/* EVALUACION */
+.eval-grid{display:grid;grid-template-columns:1fr 380px;gap:16px;margin-bottom:16px}
+.cuadrante-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:20px}
+.cuadrante-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:600;margin-bottom:4px}
+.cuadrante-sub{font-size:12px;color:var(--text3);margin-bottom:16px}
+.chart-area{position:relative;width:100%;padding-bottom:100%;background:var(--bg);border-radius:var(--r);overflow:hidden}
+.chart-inner{position:absolute;inset:0;padding:8px}
+.chart-canvas{width:100%;height:100%}
+.eval-panel{display:flex;flex-direction:column;gap:12px}
+.eval-form-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:18px 20px}
+.eval-form-title{font-size:13px;font-weight:500;margin-bottom:14px;display:flex;align-items:center;gap:7px}
+.score-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.score-label{font-size:12px;font-weight:500;color:var(--text2);min-width:130px}
+.score-input{width:60px;border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:14px;font-weight:500;text-align:center;font-family:'DM Sans',sans-serif;outline:none}
+.score-input:focus{border-color:var(--verde)}
+.score-bar-wrap{flex:1;height:6px;background:var(--border2);border-radius:3px;overflow:hidden}
+.score-bar{height:100%;border-radius:3px;transition:width .4s ease}
+.eval-hist-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:16px 18px;flex:1;overflow-y:auto;max-height:300px}
+.eval-hist-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border2);cursor:pointer}
+.eval-hist-row:last-child{border-bottom:none}
+.eval-hist-row:hover{opacity:.75}
+.eval-chip{font-size:10px;padding:2px 7px;border-radius:10px;font-weight:500;min-width:28px;text-align:center}
+.quadrant-label{position:absolute;font-size:10px;font-weight:500;padding:3px 7px;border-radius:4px;pointer-events:none}
+@media(max-width:700px){.eval-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -206,6 +231,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
     <button class="nav-btn" onclick="setPage('ficha',this)">Fichas</button>
     <button class="nav-btn" onclick="setPage('asistencia',this)">Asistencia</button>
     <button class="nav-btn" onclick="setPage('calendario',this)">Calendario</button>
+    <button class="nav-btn" onclick="setPage('evaluacion',this)">Evaluación</button>
     <div class="sync-dot" id="sync-dot" title="Conectando..."></div>
   </div>
 </div>
@@ -247,6 +273,10 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
       </div>
       <div id="asist-panel"><div style="text-align:center;padding:30px;color:var(--text3);font-size:13px;background:var(--card);border:1px solid var(--border);border-radius:var(--r2)">Seleccioná un tema y una fecha</div></div>
     </div>
+    <!-- EVALUACION -->
+    <div class="page" id="page-evaluacion">
+      <div style="text-align:center;padding:40px;color:var(--text3);font-size:13px">Cargando evaluaciones...</div>
+    </div>
     <!-- CALENDARIO -->
     <div class="page fullpage" id="page-calendario">
       <div class="cal-shell" id="cal-shell"><div style="padding:40px;text-align:center;color:var(--text3)">Cargando...</div></div>
@@ -262,7 +292,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 <script>
 const SHEET_ID='1gEmqyVm9Z7QT9L0af74E4_Y1RU0Q6yn8OVE_st9z36A';
 const API_KEY='AIzaSyBzCO5fafpaWdPq3sV3eQ05PSPpTFBP6sQ';
-const SCRIPT_URL='https://script.google.com/macros/s/AKfycbw7qm3gsqC5r65hiHxLjVBip2hpAUxI1byREk3HZOlQ4yZBuKf7PjepaHExWA3IPsqW/exec';
+const SCRIPT_URL='https://script.google.com/macros/s/AKfycbzotz04QLSOBjHk5hIkQ9QAnTHLGNHWcIF1yj-1kh-OPdgq6K1VhevJq3pHbuvhxnIN/exec';
 const BASE='https://sheets.googleapis.com/v4/spreadsheets';
 
 let AGENTES=[],TEMARIO=[],CAPS={},SESIONES=[],TRENTS=[],FERIADOS=[];
@@ -335,6 +365,7 @@ async function loadAll(){
     try{const t=await sheetGet('Calendario_Trents!A2:D');TRENTS=t.filter(r=>r[0]).map(r=>({id:r[0],fecha:r[1],temaId:r[2],notas:r[3]||''}));}catch(e){TRENTS=[];}
     try{const f=await sheetGet('Calendario_Feriados!A2:C');FERIADOS=f.filter(r=>r[0]).map(r=>({id:r[0],fecha:r[1],motivo:r[2]||''}));}catch(e){FERIADOS=[];}
     buildSidebar(AGENTES);buildTemaSelect();buildCohorteSelect();
+    await loadEvaluaciones();
     setSyncState('ok');renderDashboard();toast('✓ Datos cargados');
   }catch(e){
     setSyncState('err');toast('Sin conexión — datos locales','err');loadFallback();
@@ -604,9 +635,8 @@ function confirmarBaja(agId){
   ag.cat='Baja';ag.estadoRel='Baja';ag.motivoBaja=motivo;
   if(ag.rowIdx){
     sheetPost({updateCell:{row:ag.rowIdx,col:9,value:'Baja',sheet:'Base de Agentes'}});
-    sheetPost({updateCell:{row:ag.rowIdx,col:11,value:'Baja',sheet:'Base de Agentes'}});
-    sheetPost({updateCell:{row:ag.rowIdx,col:12,value:motivo+(obs?` — ${obs}`:''),sheet:'Base de Agentes'}});
-    sheetPost({updateCell:{row:ag.rowIdx,col:13,value:isoToF(fecha),sheet:'Base de Agentes'}});
+    sheetPost({updateCell:{row:ag.rowIdx,col:12,value:'Baja',sheet:'Base de Agentes'}});
+    sheetPost({updateCell:{row:ag.rowIdx,col:13,value:motivo+(obs?` — ${obs}`:''),sheet:'Base de Agentes'}});
   }
   closeModal();
   buildSidebar(AGENTES);
@@ -870,6 +900,291 @@ function guardarFeriado(){
   closeModal();renderCalendar();toast('✓ Feriado marcado');
 }
 
+
+// ════════════════════════════════════
+//  EVALUACIÓN
+// ════════════════════════════════════
+let EVALUACIONES = []; // [{id,agId,comercial,bdr,fecha,evaluador}]
+let evalAgSelected = null;
+let chartHoverIdx = -1;
+
+async function loadEvaluaciones(){
+  try{
+    const rows = await sheetGet('Evaluaciones!A2:F');
+    EVALUACIONES = rows.filter(r=>r[0]).map(r=>({
+      id:r[0], agId:r[1], comercial:parseFloat(r[2])||0,
+      bdr:parseFloat(r[3])||0, fecha:r[4]||'', evaluador:r[5]||''
+    }));
+  } catch(e){ EVALUACIONES=[]; }
+}
+
+function getLastEval(agId){
+  const evals = EVALUACIONES.filter(e=>e.agId===agId);
+  if(!evals.length) return null;
+  return evals.sort((a,b)=>b.fecha.localeCompare(a.fecha))[0];
+}
+
+function renderEvaluacion(){
+  const activos = AGENTES.filter(a=>a.estadoRel!=='Baja');
+  // Build agent list with last scores
+  const agListHTML = activos.map(ag=>{
+    const last = getLastEval(ag.id);
+    const cc = CAT_CFG[ag.cat]||{bg:'#888'};
+    return `<div class="agent-row${evalAgSelected===ag.id?' active':''}" 
+      data-id="${ag.id}" 
+      style="border-left:3px solid ${evalAgSelected===ag.id?'var(--verde)':'transparent'}"
+      onclick="selectEvalAg('${ag.id}')">
+      <div class="av" style="background:${cc.bg}22;color:${cc.bg}">${initials(ag.nombre)}</div>
+      <div style="flex:1">
+        <div class="agent-name-s">${ag.nombre.split(' ').slice(0,2).join(' ')}</div>
+        <div class="agent-id-s">${ag.id}</div>
+      </div>
+      ${last?`<div style="font-size:10px;color:var(--text3)">${last.comercial}/${last.bdr}</div>`:'<div style="font-size:10px;color:var(--text4)">—</div>'}
+    </div>`;
+  }).join('');
+
+  // Cuadrante data — last eval per agent
+  const points = activos.map(ag=>{
+    const last = getLastEval(ag.id);
+    if(!last) return null;
+    return {ag, c:last.comercial, b:last.bdr};
+  }).filter(Boolean);
+
+  document.getElementById('page-evaluacion').innerHTML = `
+    <div style="display:flex;gap:0;height:100%">
+      <!-- Mini sidebar agentes -->
+      <div style="width:200px;flex-shrink:0;background:var(--card);border-right:1px solid var(--border);overflow-y:auto">
+        <div class="sec-label" style="padding-top:12px">Agentes</div>
+        ${agListHTML}
+      </div>
+      <!-- Main eval content -->
+      <div style="flex:1;overflow-y:auto;padding:20px">
+        <div class="eval-grid">
+          <!-- CUADRANTE -->
+          <div class="cuadrante-wrap">
+            <div class="cuadrante-title">Matriz de capacidad</div>
+            <div class="cuadrante-sub">Último puntaje por agente · clic para ver historial</div>
+            <canvas id="eval-canvas" style="width:100%;aspect-ratio:1;border-radius:8px;cursor:crosshair"></canvas>
+          </div>
+          <!-- PANEL DERECHO -->
+          <div class="eval-panel">
+            <!-- FORM -->
+            <div class="eval-form-card">
+              <div class="eval-form-title">
+                <div style="width:7px;height:7px;border-radius:50%;background:var(--verde)"></div>
+                ${evalAgSelected ? AGENTES.find(a=>a.id===evalAgSelected)?.nombre.split(' ').slice(0,2).join(' ') : 'Seleccioná un agente'}
+              </div>
+              ${evalAgSelected ? buildEvalForm(evalAgSelected) : '<div style="font-size:12px;color:var(--text3)">Hacé clic en un agente de la lista o en el gráfico</div>'}
+            </div>
+            <!-- HISTORIAL -->
+            <div class="eval-hist-card">
+              <div style="font-size:13px;font-weight:500;margin-bottom:10px">Historial de evaluaciones</div>
+              ${buildEvalHist(evalAgSelected)}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+
+  // Draw chart after DOM ready
+  setTimeout(()=>drawCuadrante(points), 50);
+}
+
+function buildEvalForm(agId){
+  const last = getLastEval(agId);
+  const c = last?last.comercial:5, b = last?last.bdr:5;
+  return `
+    <div class="score-row">
+      <span class="score-label">Comercial (Y)</span>
+      <input type="number" class="score-input" id="ev-comercial" min="1" max="10" value="${c}" oninput="updateScoreBars()">
+      <div class="score-bar-wrap"><div class="score-bar" id="bar-c" style="width:${c*10}%;background:var(--verde)"></div></div>
+    </div>
+    <div class="score-row">
+      <span class="score-label">Base de Relaciones (X)</span>
+      <input type="number" class="score-input" id="ev-bdr" min="1" max="10" value="${b}" oninput="updateScoreBars()">
+      <div class="score-bar-wrap"><div class="score-bar" id="bar-b" style="width:${b*10}%;background:var(--purpura)"></div></div>
+    </div>
+    <div class="form-group" style="margin-bottom:10px">
+      <label class="form-label">Evaluador</label>
+      <input type="text" class="form-input" id="ev-evaluador" placeholder="Tu nombre" style="font-size:12px;padding:6px 10px">
+    </div>
+    <button class="btn-primary" style="width:100%;font-size:12px" onclick="guardarEval('${agId}')">Guardar evaluación</button>`;
+}
+
+function buildEvalHist(agId){
+  if(!agId) return '<div style="font-size:12px;color:var(--text3)">Seleccioná un agente</div>';
+  const evals = EVALUACIONES.filter(e=>e.agId===agId).sort((a,b)=>b.fecha.localeCompare(a.fecha));
+  if(!evals.length) return '<div style="font-size:12px;color:var(--text3)">Sin evaluaciones aún</div>';
+  return evals.map(e=>{
+    const quad = getQuadrant(e.comercial, e.bdr);
+    return `<div class="eval-hist-row">
+      <span style="font-size:11px;color:var(--text3);min-width:80px">${e.fecha}</span>
+      <span class="eval-chip" style="background:${quad.bg};color:${quad.color}">C:${e.comercial}</span>
+      <span class="eval-chip" style="background:${quad.bg};color:${quad.color}">B:${e.bdr}</span>
+      <span style="font-size:11px;color:var(--text2);flex:1">${quad.nombre}</span>
+    </div>`;
+  }).join('');
+}
+
+function getQuadrant(c, b){
+  if(c>=5 && b>=5) return {nombre:'Estrella',bg:'#e8f4ee',color:'#0d3d25'};
+  if(c>=5 && b<5)  return {nombre:'Potencial',bg:'#faf3e0',color:'#7a5800'};
+  if(c<5  && b>=5) return {nombre:'Relacionista',bg:'#f0ebf8',color:'#4a3060'};
+  return {nombre:'En desarrollo',bg:'#fdecea',color:'#7b2020'};
+}
+
+function updateScoreBars(){
+  const c = parseFloat(document.getElementById('ev-comercial')?.value)||0;
+  const b = parseFloat(document.getElementById('ev-bdr')?.value)||0;
+  const bc = document.getElementById('bar-c');
+  const bb = document.getElementById('bar-b');
+  if(bc) bc.style.width = Math.min(10,Math.max(0,c))*10+'%';
+  if(bb) bb.style.width = Math.min(10,Math.max(0,b))*10+'%';
+}
+
+function guardarEval(agId){
+  const c = parseFloat(document.getElementById('ev-comercial').value);
+  const b = parseFloat(document.getElementById('ev-bdr').value);
+  const ev = document.getElementById('ev-evaluador').value.trim();
+  if(isNaN(c)||isNaN(b)||c<1||c>10||b<1||b>10){ toast('Puntajes deben ser entre 1 y 10','err'); return; }
+  const fecha = new Date().toISOString().split('T')[0];
+  const uid = Math.random().toString(36).slice(2,10);
+  EVALUACIONES.push({id:uid, agId, comercial:c, bdr:b, fecha, evaluador:ev});
+  sheetPost({rows:[[uid,agId,c,b,fecha,ev]], sheet:'Evaluaciones'});
+  toast('✓ Evaluación guardada');
+  renderEvaluacion();
+}
+
+function selectEvalAg(agId){
+  evalAgSelected = agId;
+  renderEvaluacion();
+}
+
+// ── CANVAS CHART ──
+function drawCuadrante(points){
+  const canvas = document.getElementById('eval-canvas');
+  if(!canvas) return;
+  const dpr = window.devicePixelRatio||1;
+  const size = canvas.offsetWidth;
+  canvas.width = size*dpr;
+  canvas.height = size*dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr,dpr);
+
+  const pad = 36;
+  const w = size - pad*2;
+  const h = size - pad*2;
+
+  // Background quadrants
+  const quads = [
+    {x:0,  y:0,  w:0.5,h:0.5, color:'#fdecea', label:'En desarrollo'},// low c, low b (bottom-left in data = top-left inverted)
+    {x:0.5,y:0,  w:0.5,h:0.5, color:'#faf3e0', label:'Potencial'},    // high c, low b
+    {x:0,  y:0.5,w:0.5,h:0.5, color:'#f0ebf8', label:'Relacionista'}, // low c, high b
+    {x:0.5,y:0.5,w:0.5,h:0.5, color:'#e8f4ee', label:'Estrella'},     // high c, high b
+  ];
+  quads.forEach(q=>{
+    ctx.fillStyle = q.color;
+    ctx.fillRect(pad+q.x*w, pad+q.y*h, q.w*w, q.h*h);
+  });
+
+  // Grid lines
+  ctx.strokeStyle = '#ddd';
+  ctx.lineWidth = 0.5;
+  for(let i=1;i<=9;i++){
+    const x = pad + (i/10)*w;
+    const y = pad + (i/10)*h;
+    ctx.beginPath(); ctx.moveTo(x,pad); ctx.lineTo(x,pad+h); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(pad,y); ctx.lineTo(pad+w,y); ctx.stroke();
+  }
+
+  // Center dividers (bold)
+  ctx.strokeStyle = '#aaa'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(pad+w*0.5,pad); ctx.lineTo(pad+w*0.5,pad+h); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(pad,pad+h*0.5); ctx.lineTo(pad+w,pad+h*0.5); ctx.stroke();
+
+  // Quadrant labels
+  ctx.font = '10px DM Sans, sans-serif';
+  ctx.fillStyle = '#999';
+  ctx.textAlign = 'center';
+  ctx.fillText('En desarrollo', pad+w*0.25, pad+h*0.97);
+  ctx.fillText('Potencial',     pad+w*0.75, pad+h*0.97);
+  ctx.fillStyle = '#bbb';
+  ctx.fillText('Relacionista',  pad+w*0.25, pad+h*0.5-6);
+  ctx.fillText('Estrella',      pad+w*0.75, pad+h*0.5-6);
+
+  // Axis labels
+  ctx.fillStyle = '#888'; ctx.font = '10px DM Sans, sans-serif';
+  ctx.textAlign = 'center';
+  for(let i=1;i<=10;i++){
+    const x = pad + (i/10)*w - w/20;
+    ctx.fillText(i, x, pad+h+14);
+  }
+  ctx.textAlign = 'right';
+  for(let i=1;i<=10;i++){
+    const y = pad + h - (i/10)*h + h/20;
+    ctx.fillText(i, pad-4, y+3);
+  }
+
+  // Axis titles
+  ctx.fillStyle = '#555'; ctx.font = '11px DM Sans, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('Base de Relaciones', pad+w/2, size-2);
+  ctx.save(); ctx.translate(12, pad+h/2); ctx.rotate(-Math.PI/2);
+  ctx.fillText('Comercial', 0, 0); ctx.restore();
+
+  // Points
+  points.forEach((p,i)=>{
+    const x = pad + (p.b/10)*w - w/20 + w/20;
+    const y = pad + h - (p.c/10)*h + h/20 - h/20;
+    const px = pad + ((p.b-0.5)/10)*w + w/20;
+    const py = pad + h - ((p.c-0.5)/10)*h + h/20 - h/20;
+    // Correct position: map 1-10 linearly within the chart
+    const cx = pad + ((p.b-1)/9)*w;
+    const cy = pad + h - ((p.c-1)/9)*h;
+    const isSelected = evalAgSelected===p.ag.id;
+    const cc = CAT_CFG[p.ag.cat]||{bg:'#888'};
+
+    // Glow for selected
+    if(isSelected){
+      ctx.beginPath(); ctx.arc(cx,cy,12,0,Math.PI*2);
+      ctx.fillStyle = cc.bg+'44'; ctx.fill();
+    }
+
+    // Circle
+    ctx.beginPath(); ctx.arc(cx,cy,isSelected?8:6,0,Math.PI*2);
+    ctx.fillStyle = cc.bg; ctx.fill();
+    ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.stroke();
+
+    // Initials
+    ctx.fillStyle = 'white'; ctx.font = `bold ${isSelected?8:7}px DM Sans`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(initials(p.ag.nombre), cx, cy);
+
+    // Label on hover (selected)
+    if(isSelected){
+      const label = p.ag.nombre.split(' ')[0];
+      ctx.fillStyle = '#333'; ctx.font = '10px DM Sans';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+      ctx.fillText(label, cx, cy-10);
+    }
+  });
+
+  // Click handler
+  canvas.onclick = function(e){
+    const rect = canvas.getBoundingClientRect();
+    const mx = (e.clientX-rect.left);
+    const my = (e.clientY-rect.top);
+    let hit = null, minD = 20;
+    points.forEach(p=>{
+      const cx = pad + ((p.b-1)/9)*w;
+      const cy = pad + h - ((p.c-1)/9)*h;
+      const d = Math.sqrt((mx-cx)**2+(my-cy)**2);
+      if(d<minD){minD=d;hit=p;}
+    });
+    if(hit){ selectEvalAg(hit.ag.id); }
+  };
+}
+
 function setPage(page,btn){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
@@ -877,6 +1192,7 @@ function setPage(page,btn){
   if(btn)btn.classList.add('active');
   if(page==='calendario')renderCalendar();
   if(page==='dashboard')renderDashboard();
+  if(page==='evaluacion'){renderEvaluacion();}
   if(page==='asistencia'){const t=new Date().toISOString().split('T')[0];if(!document.getElementById('inp-fecha').value)document.getElementById('inp-fecha').value=t;}
 }
 
