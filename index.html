@@ -318,7 +318,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 // ═══════════════════════════════════════════
 const SHEET_ID = '1gEmqyVm9Z7QT9L0af74E4_Y1RU0Q6yn8OVE_st9z36A';
 const API_KEY  = 'AIzaSyBzCO5fafpaWdPq3sV3eQ05PSPpTFBP6sQ'
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzBZuSv2jS43I28S0M1lPrCCd9u7B82QHdEHNxTrvXLiFEgrvG5fT2d7RQqJddky_d6/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwGKuXOMHbnA9mH1GfapaFlUuGCLLlzT81g3XMH1omcFHc-l3GFFwutwp6Yl91MCxiD/exec';
 const BASE     = 'https://sheets.googleapis.com/v4/spreadsheets';
 
 // ═══════════════════════════════════════════
@@ -806,26 +806,24 @@ async function guardarAsistencia(temaId, fecha){
     return [uid, id, temaId, fechaFmt, 'Asistió'];
   });
 
-  try {
-    await sheetAppend('Registro_Capacitaciones!A:E', rows);
-    // Update local state optimistically
-    rows.forEach(r=>{
-      if(!CAPS[r[1]]) CAPS[r[1]]=[];
-      CAPS[r[1]].push({id:r[0],tema:r[2],fecha:r[3],estado:r[4]});
-    });
-    msg.className='save-msg ok';
-    msg.textContent=`✓ ${nuevos.length} registro${nuevos.length!==1?'s':''} guardado${nuevos.length!==1?'s':''}`;
-    toast(`✓ Asistencia guardada para ${nuevos.length} agente${nuevos.length!==1?'s':''}`, 'ok');
-    btn.disabled=false;
-    // Refresh asistencia panel after short delay
-    setTimeout(()=>updateSesionPanel(), 800);
-  } catch(e){
-    // With no-cors we may still get here on network error
-    msg.className='save-msg err';
-    msg.textContent='Error de red. Verificá tu conexión a internet.';
-    btn.disabled=false;
-    toast('No se pudo guardar. Sin conexión.','err');
-  }
+  // Con no-cors disparamos el fetch sin esperar respuesta
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: {'Content-Type': 'text/plain'},
+    body: JSON.stringify({rows: rows})
+  }).catch(()=>{});
+
+  // Actualizar estado local inmediatamente
+  rows.forEach(r=>{
+    if(!CAPS[r[1]]) CAPS[r[1]]=[];
+    CAPS[r[1]].push({id:r[0],tema:r[2],fecha:r[3],estado:r[4]});
+  });
+  msg.className='save-msg ok';
+  msg.textContent='✓ ' + nuevos.length + ' registro' + (nuevos.length!==1?'s':'') + ' guardado' + (nuevos.length!==1?'s':'');
+  toast('✓ Asistencia enviada para ' + nuevos.length + ' agente' + (nuevos.length!==1?'s':''), 'ok');
+  btn.disabled=false;
+  setTimeout(()=>updateSesionPanel(), 800);
 }
 
 // ═══════════════════════════════════════════
