@@ -316,8 +316,9 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 // ═══════════════════════════════════════════
 //  CONFIG
 // ═══════════════════════════════════════════
-const SHEET_ID = '1r_k2iOj94cMsEGQPX-rY0pVW-GBOc9T-';
-const API_KEY  = 'AIzaSyBzCO5fafpaWdPq3sV3eQ05PSPpTFBP6sQ';
+const SHEET_ID = '1gEmqyVm9Z7QT9L0af74E4_Y1RU0Q6yn8OVE_st9z36A';
+const API_KEY  = 'AIzaSyBzCO5fafpaWdPq3sV3eQ05PSPpTFBP6sQ'
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzBZuSv2jS43I28S0M1lPrCCd9u7B82QHdEHNxTrvXLiFEgrvG5fT2d7RQqJddky_d6/exec';
 const BASE     = 'https://sheets.googleapis.com/v4/spreadsheets';
 
 // ═══════════════════════════════════════════
@@ -376,14 +377,14 @@ async function sheetGet(range){
 }
 
 async function sheetAppend(range, values){
-  const url = `${BASE}/${SHEET_ID}/values/${encodeURIComponent(range)}:append?valueInputOption=USER_ENTERED&key=${API_KEY}`;
-  const r = await fetch(url,{
+  const r = await fetch(SCRIPT_URL, {
     method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({values})
+    mode:'no-cors',
+    headers:{'Content-Type':'text/plain'},
+    body: JSON.stringify({rows: values})
   });
-  if(!r.ok) throw new Error('Sheet write error '+r.status);
-  return r.json();
+  // no-cors returns opaque response, assume ok
+  return {ok: true};
 }
 
 // ═══════════════════════════════════════════
@@ -807,20 +808,23 @@ async function guardarAsistencia(temaId, fecha){
 
   try {
     await sheetAppend('Registro_Capacitaciones!A:E', rows);
-    // Update local state
+    // Update local state optimistically
     rows.forEach(r=>{
       if(!CAPS[r[1]]) CAPS[r[1]]=[];
       CAPS[r[1]].push({id:r[0],tema:r[2],fecha:r[3],estado:r[4]});
     });
     msg.className='save-msg ok';
     msg.textContent=`✓ ${nuevos.length} registro${nuevos.length!==1?'s':''} guardado${nuevos.length!==1?'s':''}`;
-    toast(`Asistencia guardada para ${nuevos.length} agente${nuevos.length!==1?'s':''}`, 'ok');
+    toast(`✓ Asistencia guardada para ${nuevos.length} agente${nuevos.length!==1?'s':''}`, 'ok');
     btn.disabled=false;
+    // Refresh asistencia panel after short delay
+    setTimeout(()=>updateSesionPanel(), 800);
   } catch(e){
+    // With no-cors we may still get here on network error
     msg.className='save-msg err';
-    msg.textContent='Error al guardar. Verificá la conexión.';
+    msg.textContent='Error de red. Verificá tu conexión a internet.';
     btn.disabled=false;
-    toast('Error al guardar en Google Sheets','err');
+    toast('No se pudo guardar. Sin conexión.','err');
   }
 }
 
