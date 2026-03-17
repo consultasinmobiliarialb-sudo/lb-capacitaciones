@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LandrianiBlenkmann · Capacitaciones</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --verde:#1F6C43;--verde-dark:#0d3d25;--verde-mid:#2d8a56;--verde-light:#e8f4ee;--verde-xlight:#f2faf6;
+  --dorado:#C9A227;--dorado-light:#faf3e0;--dorado-dark:#8a6c10;
+  --rojo:#c0392b;--rojo-light:#fdf0f0;
+  --purpura:#7c5c9e;--purpura-light:#f0ebf8;
+  --naranja:#c97a1a;--naranja-light:#fdf4e3;
+  --text:#1a1a1a;--text2:#4a4a4a;--text3:#888;--text4:#bbb;
+  --bg:#f5f6f4;--card:#ffffff;--border:#e0e5e2;--border2:#eef0ed;
+  --r:10px;--r2:14px;
+}
+html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:15px}
+
+/* ───── TOPBAR ───── */
+.topbar{
+  background:var(--verde-dark);
+  padding:0 20px;height:58px;
+  display:flex;align-items:center;gap:14px;
+  position:fixed;top:0;left:0;right:0;z-index:200;
+}
+.lb-mark{
+  width:38px;height:38px;border-radius:8px;
+  background:white;display:flex;align-items:center;justify-content:center;
+  font-family:'Playfair Display',serif;font-size:17px;font-weight:600;
+  color:var(--verde-dark);letter-spacing:-1px;flex-shrink:0;
+}
+.topbar-title{font-family:'Playfair Display',serif;color:white;font-size:16px;font-weight:600}
+.topbar-sub{color:rgba(255,255,255,.45);font-size:11px;margin-top:1px}
+.topbar-right{margin-left:auto;display:flex;gap:8px;align-items:center}
+.nav-btn{
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);
+  color:rgba(255,255,255,.8);font-size:12px;padding:6px 14px;border-radius:20px;
+  cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;white-space:nowrap;
+}
+.nav-btn:hover,.nav-btn.active{background:rgba(255,255,255,.18);color:white;border-color:rgba(255,255,255,.3)}
+.nav-btn.active{background:var(--dorado);border-color:var(--dorado);color:white}
+.sync-badge{font-size:11px;padding:4px 10px;border-radius:20px;color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.1)}
+.sync-badge.ok{color:#6fcf97;border-color:rgba(111,207,151,.3)}
+.sync-badge.err{color:#eb5757;border-color:rgba(235,87,87,.3)}
+.sync-badge.loading{color:var(--dorado);border-color:rgba(201,162,39,.3)}
+
+/* ───── LAYOUT ───── */
+.app{display:flex;height:100vh;padding-top:58px}
+.sidebar{
+  width:230px;flex-shrink:0;
+  background:var(--card);border-right:1px solid var(--border);
+  overflow-y:auto;display:flex;flex-direction:column;
+}
+.main{flex:1;overflow-y:auto}
+
+/* ───── SIDEBAR ───── */
+.search-wrap{padding:12px 12px 8px}
+.search-input{
+  width:100%;border:1px solid var(--border);border-radius:8px;
+  padding:7px 11px;font-size:13px;font-family:'DM Sans',sans-serif;
+  background:var(--bg);color:var(--text);outline:none;
+}
+.search-input:focus{border-color:var(--verde)}
+.sec-label{
+  font-size:10px;font-weight:500;color:var(--text4);
+  letter-spacing:.08em;text-transform:uppercase;
+  padding:10px 14px 4px;
+}
+.agent-row{
+  display:flex;align-items:center;gap:9px;
+  padding:7px 12px;cursor:pointer;transition:background .12s;
+  border-left:3px solid transparent;
+}
+.agent-row:hover{background:var(--verde-xlight)}
+.agent-row.active{background:var(--verde-light);border-left-color:var(--verde)}
+.av{
+  width:30px;height:30px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:500;flex-shrink:0;
+}
+.agent-name-s{font-size:12px;font-weight:500;line-height:1.3}
+.agent-id-s{font-size:10px;color:var(--text3)}
+.cat-pip{width:6px;height:6px;border-radius:50%;margin-left:auto;flex-shrink:0}
+
+/* ───── PAGES ───── */
+.page{display:none;padding:22px}
+.page.active{display:block}
+
+/* ─ FICHA ─ */
+.ficha-top{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r2);padding:20px 24px;
+  display:flex;gap:18px;align-items:flex-start;margin-bottom:16px;
+}
+.ficha-av{
+  width:56px;height:56px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Playfair Display',serif;font-size:20px;font-weight:600;flex-shrink:0;
+}
+.ficha-nombre{font-family:'Playfair Display',serif;font-size:20px;font-weight:600}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500}
+
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.stat-c{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r);padding:16px 18px;
+}
+.stat-n{font-family:'Playfair Display',serif;font-size:26px;font-weight:600}
+.stat-l{font-size:12px;color:var(--text2);margin-top:2px}
+.mini-bar{height:4px;background:var(--border2);border-radius:2px;margin-top:10px;overflow:hidden}
+.mini-fill{height:100%;border-radius:2px;transition:width .7s ease}
+
+.fase-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);margin-bottom:10px;overflow:hidden}
+.fase-hd{padding:12px 16px;display:flex;align-items:center;gap:9px;cursor:pointer;user-select:none}
+.fase-pip{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.fase-ttl{font-size:13px;font-weight:500;flex:1}
+.fase-prog{font-size:12px;color:var(--text3);margin-right:6px}
+.chev{font-size:10px;color:var(--text3);transition:transform .2s}
+.chev.open{transform:rotate(180deg)}
+.fase-bd{padding:0 16px 12px;display:none}
+.fase-bd.open{display:block}
+.tema-row{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid var(--border2)}
+.tema-row:last-child{border-bottom:none}
+.t-check{
+  width:20px;height:20px;border-radius:50%;border:2px solid var(--border);
+  display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;
+}
+.t-check.done{background:var(--verde);border-color:var(--verde);color:white}
+.t-check.pend-oblig{border-color:var(--dorado);border-style:dashed}
+.t-nom{font-size:13px;flex:1;color:var(--text)}
+.t-fecha{font-size:11px;color:var(--text3)}
+.t-oblig{font-size:10px;padding:2px 7px;border-radius:10px;background:var(--rojo-light);color:var(--rojo);font-weight:500}
+
+.hist-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px}
+.hist-ttl{font-size:13px;font-weight:500;margin-bottom:12px;display:flex;align-items:center;gap:7px}
+.hist-row{display:flex;align-items:center;gap:11px;padding:7px 0;border-bottom:1px solid var(--border2)}
+.hist-row:last-child{border-bottom:none}
+.h-fecha{font-size:11px;color:var(--text3);min-width:82px}
+.h-tid{font-size:11px;font-weight:500;padding:2px 8px;border-radius:10px;min-width:52px;text-align:center}
+.h-nom{font-size:12px;color:var(--text2);flex:1}
+.h-pip{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+
+/* ─ ASISTENCIA ─ */
+.asist-header{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:20px 24px;margin-bottom:16px}
+.asist-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;margin-bottom:16px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-label{font-size:12px;font-weight:500;color:var(--text2)}
+.form-select,.form-input{
+  border:1px solid var(--border);border-radius:8px;
+  padding:9px 12px;font-size:13px;font-family:'DM Sans',sans-serif;
+  background:white;color:var(--text);outline:none;
+}
+.form-select:focus,.form-input:focus{border-color:var(--verde)}
+.btn-primary{
+  background:var(--verde);color:white;border:none;
+  border-radius:8px;padding:10px 22px;font-size:13px;font-weight:500;
+  font-family:'DM Sans',sans-serif;cursor:pointer;transition:background .15s;
+}
+.btn-primary:hover{background:var(--verde-mid)}
+.btn-primary:disabled{background:var(--border);color:var(--text3);cursor:not-allowed}
+
+.sesion-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:20px 24px}
+.sesion-title{font-size:14px;font-weight:500;margin-bottom:6px}
+.sesion-sub{font-size:12px;color:var(--text3);margin-bottom:18px}
+.agentes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.ag-check-card{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 14px;border-radius:var(--r);border:2px solid var(--border);
+  cursor:pointer;transition:all .15s;user-select:none;
+}
+.ag-check-card:hover{border-color:var(--verde-mid);background:var(--verde-xlight)}
+.ag-check-card.selected{border-color:var(--verde);background:var(--verde-light)}
+.ag-check-icon{
+  width:22px;height:22px;border-radius:50%;border:2px solid var(--border);
+  display:flex;align-items:center;justify-content:center;font-size:11px;
+  flex-shrink:0;transition:all .15s;
+}
+.ag-check-card.selected .ag-check-icon{background:var(--verde);border-color:var(--verde);color:white}
+.ag-card-name{font-size:13px;font-weight:500}
+.ag-card-id{font-size:11px;color:var(--text3)}
+
+.save-row{margin-top:18px;display:flex;align-items:center;gap:14px}
+.save-msg{font-size:13px;color:var(--text3)}
+.save-msg.ok{color:var(--verde)}
+.save-msg.err{color:var(--rojo)}
+
+/* ─ EMPTY / LOADING ─ */
+.empty-state{text-align:center;padding:60px 20px;color:var(--text3)}
+.empty-icon{font-size:36px;margin-bottom:10px}
+.loading-state{text-align:center;padding:60px 20px;color:var(--text3)}
+.spinner{
+  width:32px;height:32px;border:3px solid var(--border);
+  border-top-color:var(--verde);border-radius:50%;
+  animation:spin .8s linear infinite;margin:0 auto 12px;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ─ TOAST ─ */
+.toast{
+  position:fixed;bottom:24px;right:24px;z-index:999;
+  background:var(--verde-dark);color:white;
+  padding:12px 20px;border-radius:10px;font-size:13px;
+  opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none;
+  max-width:300px;
+}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast.err{background:var(--rojo)}
+
+/* MOBILE */
+@media(max-width:600px){
+  .sidebar{width:100%;height:auto;flex-shrink:0;border-right:none;border-bottom:1px solid var(--border);max-height:200px}
+  .app{flex-direction:column}
+  .stats-grid{grid-template-columns:repeat(3,1fr);gap:8px}
+  .stat-n{font-size:20px}
+  .form-row{grid-template-columns:1fr}
+  .page{padding:14px}
+  .topbar-title{font-size:14px}
+  .nav-btn{font-size:11px;padding:5px 10px}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="lb-mark">LB</div>
+  <div>
+    <div class="topbar-title">LandrianiBlenkmann</div>
+    <div class="topbar-sub">Gestión de capacitaciones</div>
+  </div>
+  <div class="topbar-right">
+    <button class="nav-btn active" onclick="setPage('ficha')">Fichas</button>
+    <button class="nav-btn" onclick="setPage('asistencia')">Asistencia</button>
+    <span class="sync-badge loading" id="sync-badge">⟳ Conectando...</span>
+  </div>
+</div>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="search-wrap">
+      <input class="search-input" type="text" placeholder="Buscar agente..." oninput="filterAgents(this.value)" id="search-input">
+    </div>
+    <div id="sidebar-list">
+      <div class="loading-state" style="padding:20px">
+        <div class="spinner"></div>
+        <div style="font-size:12px">Cargando agentes...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <!-- FICHA PAGE -->
+    <div class="page active" id="page-ficha">
+      <div class="empty-state">
+        <div class="empty-icon">👤</div>
+        <div style="font-size:14px;font-weight:500;color:var(--text2)">Seleccioná un agente</div>
+        <div style="font-size:12px;margin-top:4px">para ver su ficha de progreso</div>
+      </div>
+    </div>
+
+    <!-- ASISTENCIA PAGE -->
+    <div class="page" id="page-asistencia">
+      <div class="asist-header">
+        <div class="asist-title">Registrar asistencia</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Tema / Capacitación</label>
+            <select class="form-select" id="sel-tema" onchange="updateSesionPanel()">
+              <option value="">— Seleccionar tema —</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Fecha</label>
+            <input type="date" class="form-input" id="inp-fecha" onchange="updateSesionPanel()">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tipo de sesión</label>
+            <select class="form-select" id="sel-tipo">
+              <option value="Onboarding">Onboarding (Cohorte)</option>
+              <option value="Trent">Trent (General)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Cohorte</label>
+            <select class="form-select" id="sel-cohorte">
+              <option value="">Todos los activos</option>
+              <option value="AG-012026">AG-012026</option>
+              <option value="AG-102025">AG-102025</option>
+              <option value="AG-092025">AG-092025</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="sesion-card" id="sesion-panel">
+        <div style="text-align:center;padding:30px;color:var(--text3);font-size:13px">
+          Seleccioná un tema y una fecha para ver los agentes disponibles
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════
+//  CONFIG
+// ═══════════════════════════════════════════
+const SHEET_ID = '1r_k2iOj94cMsEGQPX-rY0pVW-GBOc9T-';
+const API_KEY  = 'AIzaSyBzCO5fafpaWdPq3sV3eQ05PSPpTFBP6sQ';
+const BASE     = 'https://sheets.googleapis.com/v4/spreadsheets';
+
+// ═══════════════════════════════════════════
+//  STATIC DATA
+// ═══════════════════════════════════════════
+const TEMARIO = [
+  {id:'T-01',nombre:'Presentación LB (Misión, Visión, Rol)',fase:'2. Negocio',oblig:true},
+  {id:'T-02',nombre:'Tu Negocio de Relaciones (Teórico)',fase:'2. Negocio',oblig:true},
+  {id:'T-03',nombre:'Base de Relaciones (Práctico)',fase:'2. Negocio',oblig:true},
+  {id:'T-05',nombre:'Prospección (Plan Sistemático)',fase:'2. Negocio',oblig:true},
+  {id:'T-06',nombre:'Pre Listing',fase:'2. Negocio',oblig:true},
+  {id:'T-06 B',nombre:'Role Play 1',fase:'2. Negocio',oblig:true},
+  {id:'T-06 C',nombre:'Role Play 2',fase:'2. Negocio',oblig:true},
+  {id:'T-04',nombre:'Diseñando mi Negocio (Metas)',fase:'4. Técnica',oblig:false},
+  {id:'T-07',nombre:'AVP (Análisis Valor)',fase:'4. Técnica',oblig:false},
+  {id:'T-07 B',nombre:'AVP - Presentación y armado',fase:'4. Técnica',oblig:false},
+  {id:'T-08',nombre:'Derecho Inmobiliario',fase:'4. Técnica',oblig:false},
+  {id:'T-09',nombre:'Trabajando con Vendedores',fase:'4. Técnica',oblig:false},
+  {id:'T-10',nombre:'Compradores (Manejo y Calificación)',fase:'4. Técnica',oblig:false},
+  {id:'T-11',nombre:'Negociación y Cierres',fase:'4. Técnica',oblig:false},
+  {id:'T-16',nombre:'Informe al propietario (Práctica)',fase:'4. Técnica',oblig:false},
+  {id:'T-12',nombre:'Comercialización: Publicaciones y Estrategias',fase:'5. Expansión',oblig:false},
+  {id:'T-13',nombre:'Marca Personal y Redes Sociales',fase:'5. Expansión',oblig:false},
+  {id:'T-14',nombre:'Post Venta (Fidelización)',fase:'5. Expansión',oblig:false},
+  {id:'T-15',nombre:'Proyectos Inmobiliarios',fase:'5. Expansión',oblig:false},
+];
+
+const FASE_CFG = {
+  '2. Negocio':    {dot:'#1F6C43',light:'#e8f4ee',text:'#0d3d25'},
+  '4. Técnica':    {dot:'#7c5c9e',light:'#f0ebf8',text:'#4a3060'},
+  '5. Expansión':  {dot:'#c97a1a',light:'#fdf4e3',text:'#7a4800'},
+};
+const CAT_CFG = {
+  'Onboarding':   {bg:'#1F6C43',text:'white'},
+  'En formación': {bg:'#7c5c9e',text:'white'},
+  'Agente':       {bg:'#C9A227',text:'white'},
+};
+
+// ═══════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════
+let AGENTES = [];
+let CAPS    = {}; // { agentId: [{tema, fecha}] }
+let selectedAgent = null;
+let selectedAsist = new Set();
+
+// ═══════════════════════════════════════════
+//  API HELPERS
+// ═══════════════════════════════════════════
+async function sheetGet(range){
+  const url = `${BASE}/${SHEET_ID}/values/${encodeURIComponent(range)}?key=${API_KEY}`;
+  const r = await fetch(url);
+  if(!r.ok) throw new Error('Sheet read error '+r.status);
+  const d = await r.json();
+  return d.values||[];
+}
+
+async function sheetAppend(range, values){
+  const url = `${BASE}/${SHEET_ID}/values/${encodeURIComponent(range)}:append?valueInputOption=USER_ENTERED&key=${API_KEY}`;
+  const r = await fetch(url,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({values})
+  });
+  if(!r.ok) throw new Error('Sheet write error '+r.status);
+  return r.json();
+}
+
+// ═══════════════════════════════════════════
+//  LOAD DATA
+// ═══════════════════════════════════════════
+async function loadData(){
+  setSyncBadge('loading','⟳ Cargando...');
+  try {
+    // Agentes
+    const agRows = await sheetGet('Base de Agentes!A2:L');
+    AGENTES = agRows
+      .filter(r => r[0] && r[10]==='Activo')
+      .map(r => ({
+        id:     r[0]||'',
+        nombre: r[1]||'',
+        dni:    r[2]||'',
+        ingreso:r[3]||'',
+        cat:    r[7]||'Agente',
+        mentor: r[8]||'',
+        zona:   r[9]||'',
+        cohorte: inferCohorte(r[3]||''),
+      }));
+
+    // Capacitaciones
+    const capRows = await sheetGet('Registro_Capacitaciones!A2:E');
+    CAPS = {};
+    capRows.forEach(r => {
+      if(!r[1]) return;
+      if(!CAPS[r[1]]) CAPS[r[1]]=[];
+      CAPS[r[1]].push({
+        id:    r[0]||'',
+        tema:  r[2]||'',
+        fecha: formatFecha(r[3]||''),
+        estado:r[4]||'Asistió',
+      });
+    });
+
+    buildSidebar(AGENTES);
+    buildTemaSelect();
+    setSyncBadge('ok','✓ Conectado');
+    toast('Datos cargados correctamente','ok');
+  } catch(e){
+    setSyncBadge('err','✗ Sin conexión');
+    toast('No se pudo conectar al Sheet. Verificá que esté compartido.','err');
+    // Fallback con datos del xlsx
+    loadFallback();
+  }
+}
+
+function inferCohorte(fechaRaw){
+  if(!fechaRaw) return '';
+  const d = new Date(fechaRaw);
+  if(isNaN(d)) return '';
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  const yy = d.getFullYear();
+  return `AG-${mm}${yy}`;
+}
+
+function formatFecha(raw){
+  if(!raw) return '';
+  if(raw.includes('/')) return raw;
+  const d = new Date(raw);
+  if(isNaN(d)) return raw;
+  return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+}
+
+function loadFallback(){
+  AGENTES = [
+    {id:'AG-02',nombre:'Angriman Tomas Antonio',cat:'Agente',cohorte:''},
+    {id:'AG-03',nombre:'Massolo Mejia Alma Daniela',cat:'Agente',cohorte:''},
+    {id:'AG-05',nombre:'Vargas Jose Matias',cat:'Agente',cohorte:''},
+    {id:'AG-08',nombre:'Biluron Jessica Belen',cat:'En formación',cohorte:'AG-092025'},
+    {id:'AG-10',nombre:'Avella Patricia Andrea',cat:'En formación',cohorte:'AG-092025'},
+    {id:'AG-12',nombre:'Franco Abigail',cat:'En formación',cohorte:'AG-102025'},
+    {id:'AG-13',nombre:'Garcia Bono Benjamin',cat:'En formación',cohorte:'AG-102025'},
+    {id:'AG-14',nombre:'Cala Lesina Mara',cat:'En formación',cohorte:'AG-102025'},
+    {id:'AG-16',nombre:'Gamarra Mariana',cat:'Onboarding',cohorte:'AG-012026'},
+    {id:'AG-17',nombre:'Meier Nicole',cat:'Onboarding',cohorte:'AG-012026'},
+    {id:'AG-18',nombre:'Castro Jessica',cat:'Onboarding',cohorte:'AG-012026'},
+    {id:'AG-19',nombre:'Chanampa Norberto',cat:'Onboarding',cohorte:'AG-012026'},
+  ];
+  CAPS = {
+    'AG-16':[{tema:'T-01',fecha:'15/01/2026'},{tema:'T-02',fecha:'22/01/2026'},{tema:'T-03',fecha:'16/01/2026'},{tema:'T-05',fecha:'22/01/2026'},{tema:'T-08',fecha:'21/01/2026'},{tema:'T-06',fecha:'13/02/2026'},{tema:'T-16',fecha:'19/02/2026'},{tema:'T-06 B',fecha:'12/02/2026'},{tema:'T-06 C',fecha:'26/02/2026'},{tema:'T-07',fecha:'26/02/2026'}],
+    'AG-17':[{tema:'T-01',fecha:'15/01/2026'},{tema:'T-02',fecha:'22/01/2026'},{tema:'T-03',fecha:'16/01/2026'},{tema:'T-05',fecha:'22/01/2026'},{tema:'T-08',fecha:'21/01/2026'},{tema:'T-06',fecha:'13/02/2026'},{tema:'T-16',fecha:'19/02/2026'},{tema:'T-06 B',fecha:'12/02/2026'},{tema:'T-06 C',fecha:'26/02/2026'},{tema:'T-07',fecha:'26/02/2026'}],
+    'AG-18':[{tema:'T-01',fecha:'15/01/2026'},{tema:'T-02',fecha:'22/01/2026'},{tema:'T-03',fecha:'16/01/2026'},{tema:'T-05',fecha:'22/01/2026'},{tema:'T-08',fecha:'21/01/2026'},{tema:'T-06',fecha:'13/02/2026'},{tema:'T-16',fecha:'19/02/2026'},{tema:'T-06 B',fecha:'12/02/2026'},{tema:'T-06 C',fecha:'26/02/2026'},{tema:'T-07',fecha:'26/02/2026'}],
+    'AG-19':[{tema:'T-01',fecha:'16/01/2026'},{tema:'T-02',fecha:'16/01/2026'},{tema:'T-03',fecha:'16/01/2026'},{tema:'T-05',fecha:'22/01/2026'},{tema:'T-08',fecha:'21/01/2026'},{tema:'T-06',fecha:'13/02/2026'},{tema:'T-16',fecha:'19/02/2026'},{tema:'T-06 B',fecha:'12/02/2026'},{tema:'T-06 C',fecha:'26/02/2026'},{tema:'T-07',fecha:'26/02/2026'}],
+    'AG-12':[{tema:'T-01',fecha:'29/10/2025'},{tema:'T-02',fecha:'05/11/2025'},{tema:'T-03',fecha:'12/11/2025'},{tema:'T-04',fecha:'19/11/2025'},{tema:'T-05',fecha:'26/11/2025'},{tema:'T-06',fecha:'03/12/2025'},{tema:'T-07',fecha:'10/12/2025'},{tema:'T-08',fecha:'21/01/2026'}],
+    'AG-13':[{tema:'T-01',fecha:'29/10/2025'},{tema:'T-02',fecha:'05/11/2025'},{tema:'T-03',fecha:'12/11/2025'},{tema:'T-04',fecha:'19/11/2025'},{tema:'T-05',fecha:'26/11/2025'},{tema:'T-06',fecha:'03/12/2025'},{tema:'T-07',fecha:'10/12/2025'},{tema:'T-08',fecha:'21/01/2026'}],
+    'AG-14':[{tema:'T-01',fecha:'29/10/2025'},{tema:'T-02',fecha:'05/11/2025'},{tema:'T-03',fecha:'12/11/2025'},{tema:'T-04',fecha:'19/11/2025'},{tema:'T-05',fecha:'26/11/2025'},{tema:'T-06',fecha:'03/12/2025'},{tema:'T-07',fecha:'10/12/2025'},{tema:'T-08',fecha:'21/01/2026'}],
+  };
+  buildSidebar(AGENTES);
+  buildTemaSelect();
+}
+
+// ═══════════════════════════════════════════
+//  UI HELPERS
+// ═══════════════════════════════════════════
+function setSyncBadge(state, text){
+  const el = document.getElementById('sync-badge');
+  el.className = 'sync-badge '+state;
+  el.textContent = text;
+}
+
+function toast(msg, type='ok'){
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show'+(type==='err'?' err':'');
+  clearTimeout(el._t);
+  el._t = setTimeout(()=>el.classList.remove('show'),3000);
+}
+
+function initials(nombre){
+  return nombre.split(' ').slice(0,2).map(n=>n[0]||'').join('').toUpperCase();
+}
+
+function setPage(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ═══════════════════════════════════════════
+//  SIDEBAR
+// ═══════════════════════════════════════════
+function buildSidebar(agents){
+  const cats = ['Onboarding','En formación','Agente'];
+  let html = '';
+  cats.forEach(cat=>{
+    const grupo = agents.filter(a=>a.cat===cat);
+    if(!grupo.length) return;
+    const label = cat==='En formación'?'En formación':cat;
+    html += `<div class="sec-label">${label}</div>`;
+    grupo.forEach(ag=>{
+      const cc = CAT_CFG[ag.cat]||{bg:'#888',text:'white'};
+      const isActive = selectedAgent===ag.id ? ' active':'';
+      html += `<div class="agent-row${isActive}" data-id="${ag.id}" onclick="showFicha('${ag.id}')">
+        <div class="av" style="background:${cc.bg}22;color:${cc.bg}">${initials(ag.nombre)}</div>
+        <div>
+          <div class="agent-name-s">${ag.nombre.split(' ').slice(0,2).join(' ')}</div>
+          <div class="agent-id-s">${ag.id}</div>
+        </div>
+        <div class="cat-pip" style="background:${cc.bg}"></div>
+      </div>`;
+    });
+  });
+  document.getElementById('sidebar-list').innerHTML = html || '<div style="padding:20px;font-size:12px;color:var(--text3);text-align:center">Sin resultados</div>';
+}
+
+function filterAgents(q){
+  const f = AGENTES.filter(a=>
+    a.nombre.toLowerCase().includes(q.toLowerCase())||
+    a.id.toLowerCase().includes(q.toLowerCase())
+  );
+  buildSidebar(f);
+}
+
+// ═══════════════════════════════════════════
+//  FICHA
+// ═══════════════════════════════════════════
+function showFicha(id){
+  selectedAgent = id;
+  // Update sidebar active
+  document.querySelectorAll('.agent-row').forEach(el=>{
+    el.classList.toggle('active', el.dataset.id===id);
+  });
+  // Switch to ficha page
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-ficha').classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach((b,i)=>{
+    b.classList.toggle('active', i===0);
+  });
+
+  const ag = AGENTES.find(a=>a.id===id);
+  if(!ag) return;
+  const caps = CAPS[id]||[];
+  const capSet = new Set(caps.map(c=>c.tema));
+  const capMap = {};
+  caps.forEach(c=>capMap[c.tema]=c.fecha);
+
+  const total = TEMARIO.length;
+  const hechos = TEMARIO.filter(t=>capSet.has(t.id)).length;
+  const obligs = TEMARIO.filter(t=>t.oblig);
+  const obligH = obligs.filter(t=>capSet.has(t.id)).length;
+  const pct = Math.round(hechos/total*100);
+  const cc = CAT_CFG[ag.cat]||{bg:'#888',text:'white'};
+
+  // FASES HTML
+  const fasesHTML = ['2. Negocio','4. Técnica','5. Expansión'].map(f=>{
+    const tf = TEMARIO.filter(t=>t.fase===f);
+    const hf = tf.filter(t=>capSet.has(t.id)).length;
+    const fc = FASE_CFG[f];
+    const tRows = tf.map(t=>{
+      const done = capSet.has(t.id);
+      return `<div class="tema-row">
+        <div class="t-check ${done?'done':t.oblig?'pend-oblig':''}">${done?'✓':''}</div>
+        <div class="t-nom">${t.nombre}</div>
+        ${t.oblig&&!done?`<span class="t-oblig">Obligatorio</span>`:''}
+        ${done?`<span class="t-fecha">${capMap[t.id]}</span>`:''}
+      </div>`;
+    }).join('');
+    return `<div class="fase-card">
+      <div class="fase-hd" onclick="toggleFase(this)">
+        <div class="fase-pip" style="background:${fc.dot}"></div>
+        <span class="fase-ttl" style="color:${fc.dot}">${f}</span>
+        <span class="fase-prog">${hf}/${tf.length}</span>
+        <span class="chev">▼</span>
+      </div>
+      <div class="fase-bd">
+        <div style="height:4px;background:var(--border2);border-radius:2px;margin-bottom:12px;overflow:hidden">
+          <div style="height:100%;width:${Math.round(hf/tf.length*100)}%;background:${fc.dot};border-radius:2px"></div>
+        </div>
+        ${tRows}
+      </div>
+    </div>`;
+  }).join('');
+
+  // HISTORIAL
+  const histOrd = [...caps].sort((a,b)=>b.fecha.split('/').reverse().join('').localeCompare(a.fecha.split('/').reverse().join('')));
+  const histHTML = histOrd.length ? histOrd.map(c=>{
+    const t = TEMARIO.find(x=>x.id===c.tema);
+    const fc = t?FASE_CFG[t.fase]:{dot:'#888'};
+    return `<div class="hist-row">
+      <span class="h-fecha">${c.fecha}</span>
+      <span class="h-tid" style="background:${fc.dot}20;color:${fc.dot}">${c.tema}</span>
+      <span class="h-nom">${t?t.nombre:'—'}</span>
+      <span class="h-pip" style="background:${fc.dot}"></span>
+    </div>`;
+  }).join('') : '<div style="font-size:12px;color:var(--text3);padding:8px 0">Sin capacitaciones registradas aún</div>';
+
+  // Tag clase
+  const tagCls = ag.cat==='Onboarding'?'style="background:#e8f4ee;color:#1F6C43"':
+                 ag.cat==='En formación'?'style="background:#f0ebf8;color:#7c5c9e"':
+                 'style="background:#fdf4e3;color:#c97a1a"';
+
+  document.getElementById('page-ficha').innerHTML = `
+    <div class="ficha-top">
+      <div class="ficha-av" style="background:${cc.bg}18;color:${cc.bg}">${initials(ag.nombre)}</div>
+      <div style="flex:1">
+        <div class="ficha-nombre">${ag.nombre}</div>
+        <div class="tags">
+          <span class="tag" ${tagCls}>${ag.cat}</span>
+          ${ag.cohorte?`<span class="tag" style="background:var(--dorado-light);color:var(--dorado-dark)">${ag.cohorte}</span>`:''}
+          <span class="tag" style="background:var(--bg);color:var(--text3);border:1px solid var(--border)">${ag.id}</span>
+          ${ag.zona?`<span class="tag" style="background:var(--bg);color:var(--text3);border:1px solid var(--border)">${ag.zona}</span>`:''}
+        </div>
+      </div>
+      <button class="btn-primary" style="font-size:12px;padding:7px 14px" onclick="goAsistencia()">+ Asistencia</button>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-c">
+        <div class="stat-n" style="color:var(--verde)">${hechos}</div>
+        <div class="stat-l">Temas completados</div>
+        <div class="mini-bar"><div class="mini-fill" style="width:${pct}%;background:var(--verde)"></div></div>
+        <div style="font-size:11px;color:var(--text3);margin-top:4px">${pct}% del total</div>
+      </div>
+      <div class="stat-c">
+        <div class="stat-n" style="color:${obligH<obligs.length?'var(--rojo)':'var(--verde)'}">${obligH}/${obligs.length}</div>
+        <div class="stat-l">Obligatorios</div>
+        <div class="mini-bar"><div class="mini-fill" style="width:${Math.round(obligH/obligs.length*100)}%;background:${obligH<obligs.length?'var(--rojo)':'var(--verde)'}"></div></div>
+        <div style="font-size:11px;color:var(--text3);margin-top:4px">${obligs.length-obligH} pendiente${obligs.length-obligH!==1?'s':''}</div>
+      </div>
+      <div class="stat-c">
+        <div class="stat-n" style="color:var(--dorado)">${caps.length}</div>
+        <div class="stat-l">Sesiones asistidas</div>
+        <div class="mini-bar"><div class="mini-fill" style="width:${Math.min(100,Math.round(caps.length/total*100))}%;background:var(--dorado)"></div></div>
+        <div style="font-size:11px;color:var(--text3);margin-top:4px">de ${total} posibles</div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:16px">${fasesHTML}</div>
+
+    <div class="hist-card">
+      <div class="hist-ttl">
+        <span style="width:8px;height:8px;background:var(--verde);border-radius:50%;display:inline-block"></span>
+        Historial de capacitaciones
+      </div>
+      ${histHTML}
+    </div>
+  `;
+}
+
+function toggleFase(hd){
+  const bd = hd.nextElementSibling;
+  const ch = hd.querySelector('.chev');
+  bd.classList.toggle('open');
+  ch.classList.toggle('open');
+}
+
+function goAsistencia(){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-asistencia').classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach((b,i)=>b.classList.toggle('active',i===1));
+  // Set today date
+  const today = new Date();
+  const iso = today.toISOString().split('T')[0];
+  document.getElementById('inp-fecha').value = iso;
+  updateSesionPanel();
+}
+
+// ═══════════════════════════════════════════
+//  ASISTENCIA
+// ═══════════════════════════════════════════
+function buildTemaSelect(){
+  const sel = document.getElementById('sel-tema');
+  const fases = ['2. Negocio','4. Técnica','5. Expansión'];
+  let html = '<option value="">— Seleccionar tema —</option>';
+  fases.forEach(f=>{
+    const temas = TEMARIO.filter(t=>t.fase===f);
+    html += `<optgroup label="${f}">`;
+    temas.forEach(t=>{
+      html += `<option value="${t.id}">${t.id} · ${t.nombre}</option>`;
+    });
+    html += '</optgroup>';
+  });
+  sel.innerHTML = html;
+}
+
+function updateSesionPanel(){
+  const temaId  = document.getElementById('sel-tema').value;
+  const fecha   = document.getElementById('inp-fecha').value;
+  const cohorte = document.getElementById('sel-cohorte').value;
+  if(!temaId || !fecha){
+    document.getElementById('sesion-panel').innerHTML = '<div style="text-align:center;padding:30px;color:var(--text3);font-size:13px">Seleccioná un tema y una fecha para ver los agentes disponibles</div>';
+    return;
+  }
+  const tema = TEMARIO.find(t=>t.id===temaId);
+  let agentes = AGENTES.filter(a=>a.cat!=='Baja');
+  if(cohorte) agentes = agentes.filter(a=>a.cohorte===cohorte);
+
+  selectedAsist = new Set();
+
+  // Pre-seleccionar si ya tienen el tema (para saber quién ya lo hizo)
+  const yaHicieron = new Set(agentes.filter(a=>{
+    const caps = CAPS[a.id]||[];
+    return caps.some(c=>c.tema===temaId);
+  }).map(a=>a.id));
+
+  const cards = agentes.map(ag=>{
+    const cc = CAT_CFG[ag.cat]||{bg:'#888'};
+    const yaLo = yaHicieron.has(ag.id);
+    return `<div class="ag-check-card${yaLo?' selected':''}" data-id="${ag.id}" onclick="toggleAgente(this,'${ag.id}')">
+      <div class="ag-check-icon">${yaLo?'✓':''}</div>
+      <div>
+        <div class="ag-card-name">${ag.nombre.split(' ').slice(0,2).join(' ')}</div>
+        <div class="ag-card-id">${ag.id} · <span style="color:${cc.bg}">${ag.cat}</span>${yaLo?' · <span style="color:var(--verde);font-size:10px">ya registrado</span>':''}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Init selectedAsist with pre-selected (already done)
+  yaHicieron.forEach(id=>selectedAsist.add(id));
+
+  const fechaFmt = formatFechaDisplay(fecha);
+  document.getElementById('sesion-panel').innerHTML = `
+    <div class="sesion-title">${tema.nombre}</div>
+    <div class="sesion-sub">${fechaFmt} · ${agentes.length} agente${agentes.length!==1?'s':''} disponibles · Los marcados ya tienen este tema registrado</div>
+    <div class="agentes-grid">${cards||'<div style="color:var(--text3);font-size:13px">No hay agentes en este filtro</div>'}</div>
+    <div class="save-row">
+      <button class="btn-primary" onclick="guardarAsistencia('${temaId}','${fecha}')">Guardar asistencia</button>
+      <span class="save-msg" id="save-msg"></span>
+    </div>
+  `;
+}
+
+function formatFechaDisplay(iso){
+  const [y,m,d] = iso.split('-');
+  const dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  const date = new Date(iso+'T12:00:00');
+  return `${dias[date.getDay()]} ${d} de ${meses[parseInt(m)-1]} ${y}`;
+}
+
+function toggleAgente(el, id){
+  el.classList.toggle('selected');
+  const icon = el.querySelector('.ag-check-icon');
+  if(el.classList.contains('selected')){
+    selectedAsist.add(id);
+    icon.textContent='✓';
+  } else {
+    selectedAsist.delete(id);
+    icon.textContent='';
+  }
+}
+
+async function guardarAsistencia(temaId, fecha){
+  const btn = document.querySelector('.save-row .btn-primary');
+  const msg = document.getElementById('save-msg');
+  if(!selectedAsist.size){
+    msg.className='save-msg err';
+    msg.textContent='Seleccioná al menos un agente';
+    return;
+  }
+  btn.disabled=true;
+  msg.className='save-msg';
+  msg.textContent='Guardando...';
+
+  const fechaFmt = (() => {
+    const [y,m,d] = fecha.split('-');
+    return `${d}/${m}/${y}`;
+  })();
+
+  // Filtrar solo los que NO tienen ya este tema (evitar duplicados)
+  const nuevos = [...selectedAsist].filter(id=>{
+    const caps = CAPS[id]||[];
+    return !caps.some(c=>c.tema===temaId);
+  });
+
+  if(!nuevos.length){
+    msg.className='save-msg';
+    msg.textContent='Todos los seleccionados ya tienen este tema registrado';
+    btn.disabled=false;
+    return;
+  }
+
+  const rows = nuevos.map(id=>{
+    const uid = Math.random().toString(36).slice(2,10);
+    return [uid, id, temaId, fechaFmt, 'Asistió'];
+  });
+
+  try {
+    await sheetAppend('Registro_Capacitaciones!A:E', rows);
+    // Update local state
+    rows.forEach(r=>{
+      if(!CAPS[r[1]]) CAPS[r[1]]=[];
+      CAPS[r[1]].push({id:r[0],tema:r[2],fecha:r[3],estado:r[4]});
+    });
+    msg.className='save-msg ok';
+    msg.textContent=`✓ ${nuevos.length} registro${nuevos.length!==1?'s':''} guardado${nuevos.length!==1?'s':''}`;
+    toast(`Asistencia guardada para ${nuevos.length} agente${nuevos.length!==1?'s':''}`, 'ok');
+    btn.disabled=false;
+  } catch(e){
+    msg.className='save-msg err';
+    msg.textContent='Error al guardar. Verificá la conexión.';
+    btn.disabled=false;
+    toast('Error al guardar en Google Sheets','err');
+  }
+}
+
+// ═══════════════════════════════════════════
+//  SET DATE DEFAULT
+// ═══════════════════════════════════════════
+window.addEventListener('DOMContentLoaded',()=>{
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('inp-fecha').value = today;
+  loadData();
+});
+</script>
+</body>
+</html>
