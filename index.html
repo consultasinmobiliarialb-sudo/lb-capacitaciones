@@ -220,6 +220,32 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .eval-chip{font-size:10px;padding:2px 7px;border-radius:10px;font-weight:500;min-width:28px;text-align:center}
 .quadrant-label{position:absolute;font-size:10px;font-weight:500;padding:3px 7px;border-radius:4px;pointer-events:none}
 @media(max-width:700px){.eval-grid{grid-template-columns:1fr}}
+
+/* ONBOARDING SCORE */
+.ob-score-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:18px 22px;margin-bottom:14px}
+.ob-score-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.ob-score-title{font-size:13px;font-weight:500;display:flex;align-items:center;gap:7px}
+.ob-score-badge{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;padding:6px 16px;border-radius:10px;min-width:60px;text-align:center}
+.ob-score-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.ob-score-item{background:var(--bg);border-radius:var(--r);padding:10px 14px;display:flex;align-items:center;justify-content:space-between}
+.ob-score-item-label{font-size:12px;color:var(--text2)}
+.ob-score-item-val{font-size:14px;font-weight:500}
+.roleplay-wrap{border-top:1px solid var(--border2);padding-top:14px;margin-top:4px}
+.roleplay-title{font-size:12px;font-weight:500;color:var(--text2);margin-bottom:10px}
+.roleplay-card{background:var(--bg);border-radius:var(--r);padding:12px 14px;margin-bottom:8px}
+.roleplay-card:last-child{margin-bottom:0}
+.roleplay-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.roleplay-card-name{font-size:12px;font-weight:500}
+.roleplay-nota-wrap{display:flex;align-items:center;gap:8px}
+.roleplay-nota-input{width:52px;border:1px solid var(--border);border-radius:6px;padding:4px 6px;font-size:13px;font-weight:500;text-align:center;font-family:'DM Sans',sans-serif;outline:none}
+.roleplay-nota-input:focus{border-color:var(--verde)}
+.roleplay-comment{width:100%;border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:12px;font-family:'DM Sans',sans-serif;outline:none;resize:none;background:white;color:var(--text)}
+.roleplay-comment:focus{border-color:var(--verde)}
+.inasist-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border2)}
+.inasist-row:last-child{border-bottom:none}
+.inasist-fecha{font-size:11px;color:var(--text3);min-width:80px}
+.inasist-tema{font-size:12px;flex:1}
+.inasist-badge{font-size:10px;padding:2px 7px;border-radius:10px;background:var(--rojo-light);color:var(--rojo);font-weight:500}
 </style>
 </head>
 <body>
@@ -292,7 +318,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 <script>
 const SHEET_ID='1gEmqyVm9Z7QT9L0af74E4_Y1RU0Q6yn8OVE_st9z36A';
 const API_KEY='AIzaSyBzCO5fafpaWdPq3sV3eQ05PSPpTFBP6sQ';
-const SCRIPT_URL='https://script.google.com/macros/s/AKfycbypSzvIQsz5NaMOhCRWU74ZpQcySFMRKnh0EJFLtafZqcWSNAr1vuf6Pl87lM4-4QUO/exec';
+const SCRIPT_URL='https://script.google.com/macros/s/AKfycbzrD_5YoLxAwqQTG8WC5LUBdm6P1bBji6qsEfAyNqcwtKu1vCyXnLaCgL36acyFynbJ/exec';
 const BASE='https://sheets.googleapis.com/v4/spreadsheets';
 
 let AGENTES=[],TEMARIO=[],CAPS={},SESIONES=[],TRENTS=[],FERIADOS=[];
@@ -371,6 +397,7 @@ async function loadAll(){
     try{const f=await sheetGet('Calendario_Feriados!A2:C');FERIADOS=f.filter(r=>r[0]).map(r=>({id:r[0],fecha:r[1],motivo:r[2]||''}));}catch(e){FERIADOS=[];}
     buildSidebar(AGENTES);buildTemaSelect();buildCohorteSelect();
     await loadEvaluaciones();
+    await loadOnboardingData();
     setSyncState('ok');renderDashboard();toast('✓ Datos cargados');
   }catch(e){
     setSyncState('err');toast('Sin conexión — datos locales','err');loadFallback();
@@ -587,6 +614,7 @@ function showFicha(id){
       <div class="stat-c"><div class="stat-n" style="color:${obligH<obligs.length?'var(--rojo)':'var(--verde)'}">${obligH}/${obligs.length}</div><div class="stat-l">Obligatorios</div><div class="mini-bar"><div class="mini-fill" style="width:${obligs.length?Math.round(obligH/obligs.length*100):0}%;background:${obligH<obligs.length?'var(--rojo)':'var(--verde)'}"></div></div><div style="font-size:10px;color:var(--text3);margin-top:3px">${obligs.length-obligH} pendiente${obligs.length-obligH!==1?'s':''}</div></div>
       <div class="stat-c"><div class="stat-n" style="color:var(--dorado)">${caps.length}</div><div class="stat-l">Sesiones</div><div class="mini-bar"><div class="mini-fill" style="width:${Math.min(100,total?Math.round(caps.length/total*100):0)}%;background:var(--dorado)"></div></div></div>
     </div>
+    ${(ag.cat==='Onboarding'||ag.cat==='En formación')?buildOnboardingScoreHTML(id):''}
     <div style="margin-bottom:14px">${fasesHTML}</div>
     <div class="hist-card"><div class="hist-ttl"><span style="width:7px;height:7px;background:var(--verde);border-radius:50%;display:inline-block"></span>Historial</div>${histHTML}</div>`;
 }
@@ -1188,6 +1216,219 @@ function drawCuadrante(points){
     });
     if(hit){ selectEvalAg(hit.ag.id); }
   };
+}
+
+
+// ════════════════════════════════════
+//  ONBOARDING SCORE
+// ════════════════════════════════════
+let INASISTENCIAS = []; // [{id,agId,temaId,fecha,motivo}]
+let ROLEPLAY_NOTAS = []; // [{id,agId,temaId,nota,comentario,fecha,evaluador}]
+
+async function loadOnboardingData(){
+  try{
+    const rows = await sheetGet('Inasistencias!A2:E');
+    INASISTENCIAS = rows.filter(r=>r[0]).map(r=>({
+      id:r[0],agId:r[1],temaId:r[2],fecha:r[3]||'',motivo:r[4]||''
+    }));
+  } catch(e){ INASISTENCIAS=[]; }
+  try{
+    const rows = await sheetGet('RolePlay_Notas!A2:G');
+    ROLEPLAY_NOTAS = rows.filter(r=>r[0]).map(r=>({
+      id:r[0],agId:r[1],temaId:r[2],nota:parseFloat(r[3])||0,
+      comentario:r[4]||'',fecha:r[5]||'',evaluador:r[6]||''
+    }));
+  } catch(e){ ROLEPLAY_NOTAS=[]; }
+}
+
+function calcOnboardingScore(agId){
+  const caps = CAPS[agId]||[];
+  const capSet = new Set(caps.map(c=>c.tema));
+  const obligs = TEMARIO.filter(t=>t.oblig);
+  
+  // +1 por cada obligatorio asistido
+  const asistidas = obligs.filter(t=>capSet.has(t.id)).length;
+  
+  // -1 por cada inasistencia
+  const inasist = INASISTENCIAS.filter(i=>i.agId===agId).length;
+  
+  // Role play promedio (T-06 B y T-06 C)
+  const rpNotas = ROLEPLAY_NOTAS.filter(r=>r.agId===agId);
+  const rpPromedio = rpNotas.length
+    ? rpNotas.reduce((s,r)=>s+r.nota,0)/rpNotas.length
+    : 0;
+  
+  const total = asistidas - inasist + (rpPromedio>0?rpPromedio:0);
+  
+  return {
+    total: Math.round(total*10)/10,
+    asistidas,
+    totalObligs: obligs.length,
+    inasist,
+    rpNotas,
+    rpPromedio: Math.round(rpPromedio*10)/10,
+  };
+}
+
+function getScoreColor(score, maxPossible){
+  if(score<=0) return 'var(--rojo)';
+  if(score<maxPossible*0.5) return 'var(--naranja)';
+  if(score<maxPossible*0.8) return 'var(--dorado)';
+  return 'var(--verde)';
+}
+
+function buildOnboardingScoreHTML(agId){
+  const sc = calcOnboardingScore(agId);
+  const maxPossible = sc.totalObligs + 10; // obligs + max roleplay
+  const color = getScoreColor(sc.total, maxPossible);
+  
+  // Inasistencias del agente
+  const inasistList = INASISTENCIAS.filter(i=>i.agId===agId);
+  const inasistHTML = inasistList.length
+    ? inasistList.map(i=>{
+        const t = TEMARIO.find(x=>x.id===i.temaId);
+        return `<div class="inasist-row">
+          <span class="inasist-fecha">${i.fecha}</span>
+          <span class="inasist-tema">${t?t.nombre:i.temaId}</span>
+          <span class="inasist-badge">-1 pto</span>
+          <span style="font-size:10px;color:var(--text3)">${i.motivo}</span>
+        </div>`;
+      }).join('')
+    : '<div style="font-size:12px;color:var(--verde);padding:6px 0">✓ Sin inasistencias</div>';
+
+  // Role Play cards
+  const rpTemas = TEMARIO.filter(t=>t.id==='T-06 B'||t.id==='T-06 C');
+  const rpHTML = rpTemas.map(t=>{
+    const nota = ROLEPLAY_NOTAS.filter(r=>r.agId===agId&&r.temaId===t.id).sort((a,b)=>b.fecha.localeCompare(a.fecha))[0];
+    return `<div class="roleplay-card">
+      <div class="roleplay-card-header">
+        <span class="roleplay-card-name">${t.nombre}</span>
+        <div class="roleplay-nota-wrap">
+          <span style="font-size:11px;color:var(--text3)">Nota:</span>
+          <input type="number" class="roleplay-nota-input" id="rp-nota-${t.id.replace(' ','-')}" 
+            min="1" max="10" value="${nota?nota.nota:''}" placeholder="—">
+        </div>
+      </div>
+      <textarea class="roleplay-comment" id="rp-com-${t.id.replace(' ','-')}" 
+        rows="2" placeholder="Comentarios del evaluador...">${nota?nota.comentario:''}</textarea>
+      ${nota?`<div style="font-size:10px;color:var(--text3);margin-top:4px">Última evaluación: ${nota.fecha} · ${nota.evaluador||'—'}</div>`:''}
+    </div>`;
+  }).join('');
+
+  return `<div class="ob-score-wrap">
+    <div class="ob-score-header">
+      <div class="ob-score-title">
+        <div style="width:7px;height:7px;border-radius:50%;background:${color}"></div>
+        Puntaje Onboarding
+      </div>
+      <div class="ob-score-badge" style="background:${color}18;color:${color}">${sc.total>0?'+':''}${sc.total}</div>
+    </div>
+    <div class="ob-score-grid">
+      <div class="ob-score-item">
+        <span class="ob-score-item-label">Obligatorios asistidos</span>
+        <span class="ob-score-item-val" style="color:var(--verde)">+${sc.asistidas} / ${sc.totalObligs}</span>
+      </div>
+      <div class="ob-score-item">
+        <span class="ob-score-item-label">Inasistencias</span>
+        <span class="ob-score-item-val" style="color:${sc.inasist>0?'var(--rojo)':'var(--text3)'}">-${sc.inasist}</span>
+      </div>
+      <div class="ob-score-item">
+        <span class="ob-score-item-label">Promedio Role Play</span>
+        <span class="ob-score-item-val" style="color:var(--purpura)">${sc.rpPromedio>0?'+'+sc.rpPromedio:'—'}</span>
+      </div>
+      <div class="ob-score-item">
+        <span class="ob-score-item-label">Puntaje total</span>
+        <span class="ob-score-item-val" style="color:${color};font-weight:600">${sc.total>0?'+':''}${sc.total}</span>
+      </div>
+    </div>
+
+    <!-- Inasistencias -->
+    <div style="margin-bottom:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div style="font-size:12px;font-weight:500;color:var(--text2)">Inasistencias registradas</div>
+        <button class="btn-ghost" onclick="showAddInasistencia('${agId}')" 
+          style="font-size:11px;color:var(--rojo);border:1px solid var(--rojo-light);border-radius:6px;padding:3px 10px">
+          + Registrar inasistencia
+        </button>
+      </div>
+      ${inasistHTML}
+    </div>
+
+    <!-- Role Play -->
+    <div class="roleplay-wrap">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div class="roleplay-title" style="margin-bottom:0">Evaluación Role Play</div>
+        <button class="btn-primary" style="font-size:11px;padding:4px 12px" 
+          onclick="guardarRolePlay('${agId}')">Guardar notas</button>
+      </div>
+      ${rpHTML}
+    </div>
+  </div>`;
+}
+
+function showAddInasistencia(agId){
+  const obligs = TEMARIO.filter(t=>t.oblig);
+  const opts = obligs.map(t=>`<option value="${t.id}">${t.id} · ${t.nombre}</option>`).join('');
+  const motivos = ['Ausencia sin aviso','Aviso previo','Problema personal','Trabajo','Otro'];
+  const motivoOpts = motivos.map(m=>`<option value="${m}">${m}</option>`).join('');
+  openModal(`
+    <div class="modal-title" style="color:var(--rojo)">Registrar inasistencia</div>
+    <div class="form-group" style="margin-bottom:10px">
+      <label class="form-label">Tema / Sesión</label>
+      <select class="form-select" id="in-tema">${opts}</select>
+    </div>
+    <div class="form-row" style="margin-bottom:10px">
+      <div class="form-group">
+        <label class="form-label">Fecha</label>
+        <input type="date" class="form-input" id="in-fecha" value="${new Date().toISOString().split('T')[0]}">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Motivo</label>
+        <select class="form-select" id="in-motivo">${motivoOpts}</select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn-danger" onclick="guardarInasistencia('${agId}')">Registrar</button>
+    </div>`);
+}
+
+function guardarInasistencia(agId){
+  const temaId = document.getElementById('in-tema').value;
+  const fecha = isoToF(document.getElementById('in-fecha').value);
+  const motivo = document.getElementById('in-motivo').value;
+  const uid = Math.random().toString(36).slice(2,10);
+  INASISTENCIAS.push({id:uid,agId,temaId,fecha,motivo});
+  sheetPost({rows:[[uid,agId,temaId,fecha,motivo]],sheet:'Inasistencias'});
+  closeModal();
+  showFicha(agId);
+  toast('Inasistencia registrada (-1 punto)','err');
+}
+
+function guardarRolePlay(agId){
+  const rpTemas = [{id:'T-06 B'},{id:'T-06 C'}];
+  let guardados = 0;
+  rpTemas.forEach(t=>{
+    const inputId = 'rp-nota-'+t.id.replace(' ','-');
+    const comId = 'rp-com-'+t.id.replace(' ','-');
+    const notaEl = document.getElementById(inputId);
+    const comEl = document.getElementById(comId);
+    if(!notaEl||!notaEl.value) return;
+    const nota = parseFloat(notaEl.value);
+    if(isNaN(nota)||nota<1||nota>10) return;
+    const comentario = comEl?comEl.value:'';
+    const fecha = new Date().toISOString().split('T')[0];
+    const uid = Math.random().toString(36).slice(2,10);
+    ROLEPLAY_NOTAS.push({id:uid,agId,temaId:t.id,nota,comentario,fecha,evaluador:''});
+    sheetPost({rows:[[uid,agId,t.id,nota,comentario,fecha,'']],sheet:'RolePlay_Notas'});
+    guardados++;
+  });
+  if(guardados){
+    showFicha(agId);
+    toast('✓ Notas de Role Play guardadas');
+  } else {
+    toast('Ingresá al menos una nota (1-10)','err');
+  }
 }
 
 function setPage(page,btn){
