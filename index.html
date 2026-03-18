@@ -354,12 +354,12 @@ async function loadAll(){
   setSyncState('loading');
   try{
     const agRows=await sheetGet('Base de Agentes!A2:M');
-    AGENTES=agRows.filter(r=>r[1]).map((r,i)=>({
+    AGENTES=agRows.map((r,i)=>({
       cohorteOverride:r[0]||'',id:r[1]||'',nombre:r[2]||'',ingreso:r[4]||'',
       cat:r[8]||'Agente',mentor:r[9]||'',zona:r[10]||'',estadoRel:r[11]||'',
       motivoBaja:r[12]||'',
       cohorte:r[0]||inferCohorte(r[4]||''),rowIdx:i+2,
-    }));
+    })).filter(r=>r.id);
     const temRows=await sheetGet('Temario!A2:D');
     TEMARIO=temRows.filter(r=>r[0]).map(r=>({id:r[0],nombre:r[1]||'',fase:r[2]||'',oblig:(r[3]||'').toUpperCase()==='SI'}));
     if(!TEMARIO.length) TEMARIO=TEMARIO_BASE;
