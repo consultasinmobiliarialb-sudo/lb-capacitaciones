@@ -180,6 +180,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .estado-pill.active-ausente-aviso{background:#faf3e0;border-color:#C9A227;color:#7a5800;font-weight:500}
 .estado-pill.active-ausente-sin{background:#fdecea;border-color:#c0392b;color:#7b2020;font-weight:500}
 .estado-pill.active-justificado{background:#eaf2fb;border-color:#2471a3;color:#1a5276;font-weight:500}
+.estado-pill.active-no-aplica{background:#f0f2f5;border-color:#aaa;color:#666;font-weight:500}
 .estado-pill.active-tarde{background:#f0ebf8;border-color:#7c5c9e;color:#4a3060;font-weight:500}
 
 /* ASISTENCIA */
@@ -1011,7 +1012,8 @@ function showNewSessionModal(fechaStr){
       +'<div class="av" style="background:'+cc.bg+'22;color:'+cc.bg+';flex-shrink:0">'+initials(ag.nombre)+'</div>'
       +'<span class="asist-ag-name">'+ag.nombre.split(' ').slice(0,2).join(' ')+'</span>'
       +'<div class="estado-pills">'
-      +'<button class="estado-pill active-asistio" data-estado="Asistió" onclick="setEstado(this)">✓ Asistió</button>'
+      +'<button class="estado-pill active-no-aplica" data-estado="No aplica" onclick="setEstado(this)">— No aplica</button>'
+      +'<button class="estado-pill" data-estado="Asistió" onclick="setEstado(this)">✓ Asistió</button>'
       +'<button class="estado-pill" data-estado="Llegó tarde" onclick="setEstado(this)">⏱ Tarde</button>'
       +'<button class="estado-pill" data-estado="Ausente con aviso" onclick="setEstado(this)">📋 Con aviso</button>'
       +'<button class="estado-pill" data-estado="Ausente sin aviso" onclick="setEstado(this)">✗ Sin aviso</button>'
@@ -1101,7 +1103,7 @@ function guardarFeriado(){
 function setEstado(btn){
   const pills=btn.closest('.estado-pills').querySelectorAll('.estado-pill');
   pills.forEach(p=>{ p.className='estado-pill'; });
-  const map={'Asistió':'active-asistio','Llegó tarde':'active-tarde','Ausente con aviso':'active-ausente-aviso','Ausente sin aviso':'active-ausente-sin','Justificado':'active-justificado'};
+  const map={'No aplica':'active-no-aplica','Asistió':'active-asistio','Llegó tarde':'active-tarde','Ausente con aviso':'active-ausente-aviso','Ausente sin aviso':'active-ausente-sin','Justificado':'active-justificado'};
   btn.className='estado-pill '+(map[btn.dataset.estado]||'');
 }
 
@@ -1117,6 +1119,7 @@ function guardarSesionCal(){
     const agId=row.dataset.agid;
     const activeBtn=row.querySelector('.estado-pill[class*="active-"]');
     const estado=activeBtn?activeBtn.dataset.estado:'Asistió';
+    if(estado==='No aplica') return; // skip entirely
     if(estado==='Asistió'||estado==='Llegó tarde'){
       const yaReg=(CAPS[agId]||[]).some(c=>c.tema===temaId&&c.fecha===fecha);
       if(!yaReg){
