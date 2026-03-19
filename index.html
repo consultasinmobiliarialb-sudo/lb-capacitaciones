@@ -130,32 +130,57 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 
 /* CALENDARIO */
 .cal-shell{display:flex;flex-direction:column;height:100%;background:var(--card)}
-.cal-topbar{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+.cal-topbar{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
 .cal-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:600;flex:1;text-transform:capitalize}
 .cal-nav-btn{background:none;border:1px solid var(--border);border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:13px;color:var(--text2);display:flex;align-items:center;justify-content:center;transition:all .15s}
 .cal-nav-btn:hover{background:var(--verde-light);border-color:var(--verde);color:var(--verde)}
-.cal-dow-row{display:grid;grid-template-columns:repeat(7,1fr);flex-shrink:0}
+.cal-view-toggle{display:flex;border:1px solid var(--border);border-radius:7px;overflow:hidden}
+.cal-view-btn{background:none;border:none;padding:5px 12px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--text2);transition:all .15s}
+.cal-view-btn.active{background:var(--verde);color:white}
+.cal-dow-row{display:grid;flex-shrink:0}
+.cal-dow-row.monthly{grid-template-columns:repeat(7,1fr)}
+.cal-dow-row.weekly{grid-template-columns:60px repeat(5,1fr)}
 .cal-dow{padding:6px 4px;text-align:center;font-size:10px;font-weight:500;color:var(--text3);text-transform:uppercase;background:var(--bg);border-bottom:1px solid var(--border)}
 .cal-body{flex:1;overflow-y:auto}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);grid-auto-rows:minmax(90px,1fr)}
-.cal-cell{border-right:1px solid var(--border2);border-bottom:1px solid var(--border2);padding:4px;min-height:90px}
-.cal-cell:nth-child(7n){border-right:none}
-.cal-cell.other-month{background:var(--bg);opacity:.4}
+.cal-grid{display:grid}
+.cal-grid.monthly{grid-template-columns:repeat(7,1fr);grid-auto-rows:minmax(90px,1fr)}
+.cal-grid.weekly{grid-template-columns:60px repeat(5,1fr)}
+.cal-cell{border-right:1px solid var(--border2);border-bottom:1px solid var(--border2);padding:4px;min-height:90px;cursor:pointer;transition:background .12s}
+.cal-cell:hover{background:var(--verde-xlight)}
+.cal-cell.weekend{background:var(--bg);opacity:.5;cursor:default}
+.cal-cell.weekend:hover{background:var(--bg)}
+.cal-cell.other-month{background:var(--bg);opacity:.35;cursor:default}
+.cal-cell.other-month:hover{background:var(--bg)}
+.cal-cell.today{background:var(--verde-xlight)}
 .cal-cell.today .cal-day-num{background:var(--verde);color:white;border-radius:50%}
+.cal-cell:last-child{border-right:none}
 .cal-day-num{font-size:11px;font-weight:500;color:var(--text2);width:20px;height:20px;display:flex;align-items:center;justify-content:center;margin-bottom:3px}
-.cal-ev{font-size:10px;padding:2px 5px;border-radius:3px;margin-bottom:2px;cursor:pointer;font-weight:500;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:opacity .15s}
-.cal-ev:hover{opacity:.75}
-.cal-ev.teo{background:#e8f4ee;color:#0d3d25}
-.cal-ev.teo.realizado{background:#1F6C43;color:white}
-.cal-ev.work{background:#c8e6d4;color:#0d3d25}
-.cal-ev.work.realizado{background:#2d8a56;color:white}
-.cal-ev.trent{background:#ede8f5;color:#4a3060}
-.cal-ev.trent.realizado{background:#7c5c9e;color:white}
+.cal-add-hint{font-size:9px;color:var(--text4);text-align:center;margin-top:2px;opacity:0;transition:opacity .15s}
+.cal-cell:hover .cal-add-hint{opacity:1}
+.cal-ev{font-size:10px;padding:2px 5px;border-radius:3px;margin-bottom:2px;cursor:pointer;font-weight:500;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:opacity .15s;position:relative;z-index:1}
+.cal-ev:hover{opacity:.8}
+.cal-ev.sesion{background:#1F6C43;color:white}
+.cal-ev.sesion.parcial{background:#2d8a56;color:white}
+.cal-ev.sesion.pendiente{background:#e8f4ee;color:#0d3d25;border:1px dashed #9dcbb3}
 .cal-ev.feriado{background:#fdecea;color:#7b2020}
-.cal-ev.sin-tema{background:#f5f5f0;color:#888;border:1px dashed #ccc}
+.cal-ev-count{font-size:9px;opacity:.8}
+.week-time-col{border-right:1px solid var(--border2)}
+.week-slot{height:60px;border-bottom:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--text4)}
 .cal-legend{display:flex;gap:12px;padding:8px 14px;border-top:1px solid var(--border2);flex-shrink:0;flex-wrap:wrap}
 .leg-item{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text2)}
 .leg-dot{width:9px;height:9px;border-radius:2px;flex-shrink:0}
+/* Asistencia en modal */
+.asist-estado-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border2)}
+.asist-estado-row:last-child{border-bottom:none}
+.asist-ag-name{font-size:13px;flex:1}
+.estado-pills{display:flex;gap:4px;flex-wrap:wrap}
+.estado-pill{font-size:10px;padding:3px 8px;border-radius:20px;border:1px solid var(--border);cursor:pointer;transition:all .15s;background:white;font-family:'DM Sans',sans-serif;white-space:nowrap}
+.estado-pill:hover{border-color:var(--text3)}
+.estado-pill.active-asistio{background:#e8f4ee;border-color:#1F6C43;color:#0d3d25;font-weight:500}
+.estado-pill.active-ausente-aviso{background:#faf3e0;border-color:#C9A227;color:#7a5800;font-weight:500}
+.estado-pill.active-ausente-sin{background:#fdecea;border-color:#c0392b;color:#7b2020;font-weight:500}
+.estado-pill.active-justificado{background:#eaf2fb;border-color:#2471a3;color:#1a5276;font-weight:500}
+.estado-pill.active-tarde{background:#f0ebf8;border-color:#7c5c9e;color:#4a3060;font-weight:500}
 
 /* ASISTENCIA */
 .asist-header{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:18px 22px;margin-bottom:14px}
@@ -750,171 +775,358 @@ function guardarNuevoTema(){
 }
 
 // ── CALENDARIO ──
-function getCohortes(){return[...new Set(AGENTES.filter(a=>a.cohorte&&a.estadoRel!=='Baja').map(a=>a.cohorte))].map(c=>({id:c,mes:parseInt(c.slice(3,5))-1,anio:parseInt(c.slice(5))}));}
+let calView = 'monthly'; // 'monthly' or 'weekly'
 
-// Detect if a past day had sessions from CAPS data
-function getAsistenciasEnFecha(fechaStr){
-  const map={};// temaId -> [agentIds]
-  Object.entries(CAPS).forEach(([agId,caps])=>{
-    caps.forEach(c=>{if(c.fecha===fechaStr){if(!map[c.tema])map[c.tema]=[];map[c.tema].push(agId);}});
-  });
-  return map;
+// SESIONES_CAL: unified list of all sessions {id,fecha,temaId,tipo,cohorte,notas,asistencia:{agId:estado}}
+let SESIONES_CAL = []; // loaded from Registro_Capacitaciones + Calendario_Sesiones
+
+function getCohortes(){
+  return[...new Set(AGENTES.filter(a=>a.cohorte&&a.estadoRel!=='Baja').map(a=>a.cohorte))].map(c=>({
+    id:c,mes:parseInt(c.slice(3,5))-1,anio:parseInt(c.slice(5))
+  }));
 }
 
-function getEventsForDay(y,m,d){
-  const fechaStr=getFStr(y,m,d),dow=new Date(y,m,d).getDay(),events=[];
-  const feriado=FERIADOS.find(f=>f.fecha===fechaStr);
-  if(feriado){events.push({tipo:'feriado',label:'Feriado: '+feriado.motivo,fecha:fechaStr,feriado});return events;}
-  const asistMap=getAsistenciasEnFecha(fechaStr);
-  const hoy=new Date();const esPasado=new Date(y,m,d)<new Date(hoy.getFullYear(),hoy.getMonth(),hoy.getDate());
+function buildSesionesCal(){
+  // Build unified session map from CAPS (Registro_Capacitaciones)
+  // Group by fecha+tema to create sessions
+  const map = {}; // key: fecha|temaId
+  Object.entries(CAPS).forEach(([agId, caps])=>{
+    caps.forEach(c=>{
+      const key = c.fecha+'|'+c.tema;
+      if(!map[key]) map[key] = {fecha:c.fecha, temaId:c.tema, asistencia:{}};
+      map[key].asistencia[agId] = c.estado||'Asistió';
+    });
+  });
+  // Add inasistencias
+  INASISTENCIAS.forEach(i=>{
+    const key = i.fecha+'|'+i.temaId;
+    if(!map[key]) map[key] = {fecha:i.fecha, temaId:i.temaId, asistencia:{}};
+    if(!map[key].asistencia[i.agId]){
+      map[key].asistencia[i.agId] = i.motivo||'Ausente sin aviso';
+    }
+  });
+  SESIONES_CAL = Object.values(map);
+}
 
-  if(dow===4){
-    getCohortes().forEach(c=>{
-      const ini=c.mes+c.anio*12,cur=m+y*12;
-      if(cur>=ini&&cur<=ini+1){
-        const ses=SESIONES.find(s=>s.fecha===fechaStr&&s.tipo==='Teo'&&s.cohorte===c.id);
-        const tema=ses?TEMARIO.find(t=>t.id===ses.temaId):null;
-        // Check if there's attendance data for this day
-        const temasDelDia=Object.keys(asistMap);
-        const temaRealizado=temasDelDia.find(tid=>TEMARIO.find(t=>t.id===tid&&t.fase==='2. Negocio'));
-        const realizado=esPasado&&(ses||temaRealizado);
-        const label=tema?`Teórico · ${tema.nombre}`:temaRealizado?`Teórico · ${TEMARIO.find(t=>t.id===temaRealizado)?.nombre||temaRealizado}`:'Teórico';
-        events.push({tipo:'teo',label,fecha:fechaStr,cohorte:c.id,sesion:ses||null,sinTema:!ses&&!temaRealizado,realizado,asistMap});
-      }
-    });
-  }
-  if(dow===5){
-    getCohortes().forEach(c=>{
-      const ini=c.mes+c.anio*12,cur=m+y*12;
-      if(cur>=ini&&cur<=ini+1){
-        const ses=SESIONES.find(s=>s.fecha===fechaStr&&s.tipo==='Workshop'&&s.cohorte===c.id);
-        const tema=ses?TEMARIO.find(t=>t.id===ses.temaId):null;
-        const realizado=esPasado&&(ses||Object.keys(asistMap).length>0);
-        events.push({tipo:'work',label:tema?`Workshop · ${tema.nombre}`:'Workshop',fecha:fechaStr,cohorte:c.id,sesion:ses||null,sinTema:!ses&&!realizado,realizado,asistMap});
-      }
-    });
-  }
-  if(dow===3){
-    const trent=TRENTS.find(t=>t.fecha===fechaStr);
-    const tema=trent?TEMARIO.find(t=>t.id===trent.temaId):null;
-    const temaRealizado=trent?Object.keys(asistMap).find(id=>id===trent.temaId):null;
-    const realizado=esPasado&&(trent||Object.keys(asistMap).length>0);
-    events.push({tipo:'trent',label:tema?`Trent · ${tema.nombre}`:'Trent',fecha:fechaStr,trent:trent||null,sinTema:!trent&&!realizado,realizado,asistMap});
-  }
-  return events;
+function getSessionsForDate(fechaStr){
+  return SESIONES_CAL.filter(s=>s.fecha===fechaStr);
 }
 
 function renderCalendar(){
+  buildSesionesCal();
+  if(calView==='monthly') renderMonthly();
+  else renderWeekly();
+}
+
+// ── MONTHLY VIEW ──
+function renderMonthly(){
   const y=calYear,m=calMonth;
-  const firstDow=new Date(y,m,1).getDay(),daysInMonth=new Date(y,m+1,0).getDate();
+  const firstDow=new Date(y,m,1).getDay();
+  const daysInMonth=new Date(y,m+1,0).getDate();
   const hoy=new Date();
-  const dowHTML=DIAS_S.map(d=>`<div class="cal-dow">${d}</div>`).join('');
+
+  const dowHTML=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'].map(d=>`<div class="cal-dow">${d}</div>`).join('');
+
   let gridHTML='';
-  for(let i=0;i<firstDow;i++)gridHTML+=`<div class="cal-cell other-month"></div>`;
+  for(let i=0;i<firstDow;i++) gridHTML+=`<div class="cal-cell other-month"></div>`;
+
   for(let d=1;d<=daysInMonth;d++){
+    const dow=new Date(y,m,d).getDay();
     const isHoy=hoy.getDate()===d&&hoy.getMonth()===m&&hoy.getFullYear()===y;
-    const events=getEventsForDay(y,m,d);
-    const evHTML=events.map(e=>{
-      const cls=e.tipo==='feriado'?'feriado':e.tipo==='teo'?'teo':e.tipo==='work'?'work':'trent';
-      const realCls=e.realizado?' realizado':'';
-      const sinCls=e.sinTema&&!e.realizado?' sin-tema':'';
-      const ds=encodeURIComponent(JSON.stringify(e));
-      return `<div class="cal-ev ${cls}${realCls}${sinCls}" onclick="showDayModal('${ds}')" title="${e.label}">${e.label}</div>`;
-    }).join('');
-    gridHTML+=`<div class="cal-cell${isHoy?' today':''}"><div class="cal-day-num">${d}</div>${evHTML}</div>`;
-  }
-  const rem=(firstDow+daysInMonth)%7===0?0:7-(firstDow+daysInMonth)%7;
-  for(let i=0;i<rem;i++)gridHTML+=`<div class="cal-cell other-month"></div>`;
-  document.getElementById('cal-shell').innerHTML=`
-    <div class="cal-topbar">
-      <button class="cal-nav-btn" onclick="calNav(-1)">‹</button>
-      <div class="cal-title">${MESES[m]} ${y}</div>
-      <button class="cal-nav-btn" onclick="calNav(1)">›</button>
-      <button class="btn-secondary" style="font-size:12px;padding:5px 12px;margin-left:8px" onclick="showAddFeriado()">+ Feriado</button>
-      <button class="btn-primary" style="font-size:12px;padding:5px 12px" onclick="showAddTrent()">+ Trent</button>
-    </div>
-    <div class="cal-dow-row">${dowHTML}</div>
-    <div class="cal-body"><div class="cal-grid">${gridHTML}</div></div>
-    <div class="cal-legend">
-      <div class="leg-item"><div class="leg-dot" style="background:#1F6C43"></div>Realizado</div>
-      <div class="leg-item"><div class="leg-dot" style="background:#e8f4ee;border:1px solid #9dcbb3"></div>Teórico programado</div>
-      <div class="leg-item"><div class="leg-dot" style="background:#ede8f5;border:1px solid #b8a8d8"></div>Trent programado</div>
-      <div class="leg-item"><div class="leg-dot" style="background:#f5f5f0;border:1px dashed #ccc"></div>Sin tema</div>
-      <div class="leg-item"><div class="leg-dot" style="background:#fdecea"></div>Feriado</div>
+    const isWeekend=dow===0||dow===6;
+    const fechaStr=getFStr(y,m,d);
+    const feriado=FERIADOS.find(f=>f.fecha===fechaStr);
+    const sessions=getSessionsForDate(fechaStr);
+
+    let evHTML='';
+    if(feriado){
+      evHTML=`<div class="cal-ev feriado" onclick="event.stopPropagation()" title="${feriado.motivo}">🚫 ${feriado.motivo}</div>`;
+    } else {
+      evHTML=sessions.map(s=>{
+        const tema=TEMARIO.find(t=>t.id===s.temaId);
+        const totalAg=AGENTES.filter(a=>a.estadoRel!=='Baja').length;
+        const asistieron=Object.values(s.asistencia).filter(e=>e==='Asistió'||e==='Llegó tarde').length;
+        const ausentes=Object.values(s.asistencia).filter(e=>e!=='Asistió'&&e!=='Llegó tarde').length;
+        const cls=asistieron>0?'sesion':'sesion pendiente';
+        const ds=encodeURIComponent(JSON.stringify({fecha:s.fecha,temaId:s.temaId}));
+        return `<div class="cal-ev ${cls}" onclick="event.stopPropagation();showSessionModal('${ds}')" title="${tema?tema.nombre:s.temaId}">
+          ${tema?tema.nombre.slice(0,22):s.temaId}
+          <span class="cal-ev-count">${asistieron>0?` ✓${asistieron}`:''}${ausentes>0?` ✗${ausentes}`:''}</span>
+        </div>`;
+      }).join('');
+    }
+
+    const cellCls = isWeekend?'weekend':isHoy?'today':'';
+    const clickHandler = isWeekend||feriado?'':` onclick="showNewSessionModal('${fechaStr}')"`;
+    gridHTML+=`<div class="cal-cell ${cellCls}"${clickHandler}>
+      <div class="cal-day-num">${d}</div>
+      ${evHTML}
+      ${!isWeekend&&!feriado?'<div class="cal-add-hint">+ sesión</div>':''}
     </div>`;
-}
-function calNav(dir){calMonth+=dir;if(calMonth<0){calMonth=11;calYear--;}if(calMonth>11){calMonth=0;calYear++;}renderCalendar();}
+  }
 
-function showDayModal(ds){
-  const e=JSON.parse(decodeURIComponent(ds));
-  const tema=e.sesion?TEMARIO.find(t=>t.id===e.sesion.temaId):e.trent?TEMARIO.find(t=>t.id===e.trent.temaId):null;
-  // Asistentes: buscar en CAPS por fecha
-  const asistentes=AGENTES.filter(ag=>(CAPS[ag.id]||[]).some(c=>{
-    if(c.fecha!==e.fecha)return false;
-    if(e.trent)return c.tema===e.trent.temaId;
-    if(e.sesion)return c.tema===e.sesion.temaId;
-    // fallback: any cap on that date
-    return true;
-  }));
-  // Deduplicate by date only if no specific tema
-  const asistChips=asistentes.length
-    ?asistentes.map(a=>`<span class="asist-chip">${initials(a.nombre)} ${a.nombre.split(' ')[0]}</span>`).join('')
-    :'<div style="font-size:12px;color:var(--text3)">Sin asistencia registrada</div>';
-  let html=`<div class="modal-title">${e.tipo==='teo'?'Teórico':e.tipo==='work'?'Workshop':e.tipo==='trent'?'Trent':'Feriado'}</div>
-    <div class="info-block"><div class="info-label">Fecha</div><div class="info-val">${e.fecha}</div></div>`;
-  if(e.cohorte)html+=`<div class="info-block"><div class="info-label">Cohorte</div><div class="info-val">${e.cohorte}</div></div>`;
-  if(tema)html+=`<div class="info-block"><div class="info-label">Tema</div><div class="info-val">${tema.nombre}</div></div>`;
-  if(e.feriado)html+=`<div class="info-block"><div class="info-label">Motivo</div><div class="info-val">${e.feriado.motivo}</div></div>`;
-  if(e.tipo!=='feriado')html+=`<div class="info-block"><div class="info-label">Asistentes (${asistentes.length})</div><div style="margin-top:6px">${asistChips}</div></div>`;
-  const editBtn=e.tipo==='trent'?`<button class="btn-secondary" onclick="closeModal();showAddTrent('${e.fecha}')">Editar</button>`:
-    (e.tipo==='teo'||e.tipo==='work')?`<button class="btn-secondary" onclick="closeModal();showEditSesion('${e.fecha}','${e.tipo}','${e.cohorte||''}')">Editar</button>`:'';
-  html+=`<div class="modal-footer">${editBtn}<button class="btn-primary" onclick="closeModal()">Cerrar</button></div>`;
-  openModal(html);
+  const rem=(firstDow+daysInMonth)%7===0?0:7-(firstDow+daysInMonth)%7;
+  for(let i=0;i<rem;i++) gridHTML+=`<div class="cal-cell other-month"></div>`;
+
+  document.getElementById('cal-shell').innerHTML=`
+    ${buildCalTopbar()}
+    <div class="cal-dow-row monthly">${dowHTML}</div>
+    <div class="cal-body"><div class="cal-grid monthly">${gridHTML}</div></div>
+    ${buildCalLegend()}`;
 }
 
-function showEditSesion(fecha,tipo,cohorte){
+// ── WEEKLY VIEW ──
+function renderWeekly(){
+  const hoy=new Date();
+  // Get Monday of current week
+  const mon=new Date(hoy);
+  mon.setDate(hoy.getDate()-(hoy.getDay()||7)+1);
+  // Navigate weeks via calYear/calMonth — use a week offset
+  // Use calYear+calMonth to derive week start
+  const weekStart=new Date(calYear,calMonth,1);
+  // Find Monday of the week containing calYear/calMonth/calDay (use day 1 as anchor)
+  weekStart.setDate(weekStart.getDate()-(weekStart.getDay()||7)+1);
+
+  const days=[];
+  for(let i=0;i<5;i++){
+    const d=new Date(weekStart);
+    d.setDate(weekStart.getDate()+i);
+    days.push(d);
+  }
+
+  const weekLabel=`${days[0].getDate()}/${days[0].getMonth()+1} – ${days[4].getDate()}/${days[4].getMonth()+1}/${days[4].getFullYear()}`;
+
+  const dowHTML=`<div class="cal-dow" style="border-right:1px solid var(--border2)"></div>`+
+    days.map(d=>{
+      const isHoy=d.toDateString()===hoy.toDateString();
+      return `<div class="cal-dow" style="${isHoy?'color:var(--verde);font-weight:600':''}">${['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'][d.getDay()]} ${d.getDate()}</div>`;
+    }).join('');
+
+  const dayCols=days.map(d=>{
+    const fechaStr=getFStr(d.getFullYear(),d.getMonth(),d.getDate());
+    const feriado=FERIADOS.find(f=>f.fecha===fechaStr);
+    const sessions=getSessionsForDate(fechaStr);
+    const isHoy=d.toDateString()===hoy.toDateString();
+
+    let content='';
+    if(feriado){
+      content=`<div class="cal-ev feriado" style="margin:4px">🚫 ${feriado.motivo}</div>`;
+    } else {
+      content=sessions.map(s=>{
+        const tema=TEMARIO.find(t=>t.id===s.temaId);
+        const asistieron=Object.values(s.asistencia).filter(e=>e==='Asistió'||e==='Llegó tarde').length;
+        const ausentes=Object.values(s.asistencia).filter(e=>e!=='Asistió'&&e!=='Llegó tarde').length;
+        const ds=encodeURIComponent(JSON.stringify({fecha:s.fecha,temaId:s.temaId}));
+        return `<div class="cal-ev sesion" style="margin:2px 4px;white-space:normal;line-height:1.3" 
+          onclick="event.stopPropagation();showSessionModal('${ds}')">
+          <div style="font-size:11px;font-weight:500">${tema?tema.nombre:'Capacitación'}</div>
+          <div style="font-size:9px;opacity:.8;margin-top:1px">✓${asistieron} ✗${ausentes}</div>
+        </div>`;
+      }).join('');
+      if(!feriado) content+=`<div class="cal-add-hint" style="opacity:1;padding:4px;color:var(--text4)">+ sesión</div>`;
+    }
+
+    return `<div class="cal-cell${isHoy?' today':''}" style="min-height:120px;padding:6px" 
+      onclick="${feriado?'':'showNewSessionModal(''+fechaStr+'')'}">
+      ${content}
+    </div>`;
+  }).join('');
+
+  document.getElementById('cal-shell').innerHTML=`
+    ${buildCalTopbar(weekLabel)}
+    <div class="cal-dow-row weekly">${dowHTML}</div>
+    <div class="cal-body"><div class="cal-grid weekly">${dayCols}</div></div>
+    ${buildCalLegend()}`;
+}
+
+function buildCalTopbar(subtitle){
+  const title = subtitle||MESES[calMonth]+' '+calYear;
+  return `<div class="cal-topbar">
+    <button class="cal-nav-btn" onclick="calNav(-1)">‹</button>
+    <div>
+      <div class="cal-title">${title}</div>
+    </div>
+    <button class="cal-nav-btn" onclick="calNav(1)">›</button>
+    <div class="cal-view-toggle" style="margin-left:8px">
+      <button class="cal-view-btn${calView==='monthly'?' active':''}" onclick="setCalView('monthly')">Mes</button>
+      <button class="cal-view-btn${calView==='weekly'?' active':''}" onclick="setCalView('weekly')">Semana</button>
+    </div>
+    <button class="btn-secondary" style="font-size:12px;padding:5px 12px" onclick="showAddFeriado()">+ Feriado</button>
+    <button class="btn-primary" style="font-size:12px;padding:5px 12px" onclick="showNewSessionModal('')">+ Sesión</button>
+  </div>`;
+}
+
+function buildCalLegend(){
+  return `<div class="cal-legend">
+    <div class="leg-item"><div class="leg-dot" style="background:#1F6C43"></div>Con asistencia</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#e8f4ee;border:1px dashed #9dcbb3"></div>Pendiente</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#fdecea"></div>Feriado</div>
+    <div class="leg-item" style="color:var(--text3)">✓ Asistió · ✗ Ausente · Clic en día para agregar sesión</div>
+  </div>`;
+}
+
+function setCalView(view){ calView=view; renderCalendar(); }
+function calNav(dir){
+  if(calView==='monthly'){
+    calMonth+=dir;
+    if(calMonth<0){calMonth=11;calYear--;}
+    if(calMonth>11){calMonth=0;calYear++;}
+  } else {
+    // Navigate by week — shift month by 7 days
+    const d=new Date(calYear,calMonth,1);
+    d.setDate(d.getDate()+dir*7);
+    calYear=d.getFullYear();calMonth=d.getMonth();
+  }
+  renderCalendar();
+}
+
+// ── NUEVA SESIÓN ──
+function showNewSessionModal(fechaStr){
+  if(!fechaStr){
+    const hoy=new Date();
+    fechaStr=getFStr(hoy.getFullYear(),hoy.getMonth(),hoy.getDate());
+  }
   const temaOpts=TEMARIO.map(t=>`<option value="${t.id}">${t.id} · ${t.nombre}</option>`).join('');
-  const sesExist=SESIONES.find(s=>s.fecha===fecha&&s.tipo===(tipo==='teo'?'Teo':'Workshop')&&s.cohorte===cohorte);
-  openModal(`<div class="modal-title">${tipo==='teo'?'Teórico':'Workshop'} — ${fecha}</div>
-    <div class="info-block" style="margin-bottom:10px"><div class="info-label">Cohorte</div><div class="info-val">${cohorte}</div></div>
-    <div class="form-group" style="margin-bottom:10px"><label class="form-label">Tema</label>
-      <select class="form-select" id="ses-tema"><option value="">— Seleccionar —</option>${temaOpts}<option value="__nuevo__">＋ Agregar nuevo tema</option></select></div>
-    <div class="form-group"><label class="form-label">Notas</label><input type="text" class="form-input" id="ses-notas" value="${sesExist?sesExist.notas:''}" placeholder="Opcional"></div>
-    <div class="modal-footer"><button class="btn-secondary" onclick="closeModal()">Cancelar</button><button class="btn-primary" onclick="guardarSesion('${fecha}','${tipo}','${cohorte}')">Guardar</button></div>`);
-  if(sesExist)document.getElementById('ses-tema').value=sesExist.temaId;
-  document.getElementById('ses-tema').onchange=function(){if(this.value==='__nuevo__')showAddTema(this);};
-}
-function guardarSesion(fecha,tipo,cohorte){
-  const temaId=document.getElementById('ses-tema').value,notas=document.getElementById('ses-notas').value;
-  if(!temaId||temaId==='__nuevo__'){alert('Seleccioná un tema');return;}
-  const tipoKey=tipo==='teo'?'Teo':'Workshop',uid=Math.random().toString(36).slice(2,10);
-  SESIONES=SESIONES.filter(s=>!(s.fecha===fecha&&s.tipo===tipoKey&&s.cohorte===cohorte));
-  SESIONES.push({id:uid,fecha,tipo:tipoKey,cohorte,temaId,notas});
-  sheetPost({rows:[[uid,fecha,tipoKey,cohorte,temaId,notas]],sheet:'Calendario_Sesiones'});
-  closeModal();renderCalendar();toast('✓ Sesión actualizada');
+  const isoFecha=fToIso(fechaStr);
+  // Filter active agents
+  const activos=AGENTES.filter(a=>a.estadoRel!=='Baja');
+
+  openModal(`
+    <div class="modal-title">Nueva sesión — ${fechaStr}</div>
+    <div class="form-row" style="margin-bottom:12px">
+      <div class="form-group">
+        <label class="form-label">Fecha</label>
+        <input type="date" class="form-input" id="ns-fecha" value="${isoFecha}" onchange="updateNewSessionDate(this.value)">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tema</label>
+        <select class="form-select" id="ns-tema">
+          <option value="">— Seleccionar —</option>
+          ${temaOpts}
+          <option value="__nuevo__">＋ Agregar nuevo tema</option>
+        </select>
+      </div>
+    </div>
+    <div style="font-size:12px;font-weight:500;color:var(--text2);margin-bottom:8px">Asistencia por agente</div>
+    <div id="ns-agentes-list">
+      ${activos.map(ag=>{
+        const cc=CAT_CFG[ag.cat]||{bg:'#888'};
+        return `<div class="asist-estado-row" data-agid="${ag.id}">
+          <div class="av" style="background:${cc.bg}22;color:${cc.bg};flex-shrink:0">${initials(ag.nombre)}</div>
+          <span class="asist-ag-name">${ag.nombre.split(' ').slice(0,2).join(' ')}</span>
+          <div class="estado-pills">
+            <button class="estado-pill active-asistio" data-estado="Asistió" onclick="setEstado(this,'${ag.id}')">✓ Asistió</button>
+            <button class="estado-pill" data-estado="Llegó tarde" onclick="setEstado(this,'${ag.id}')">⏱ Tarde</button>
+            <button class="estado-pill" data-estado="Ausente con aviso" onclick="setEstado(this,'${ag.id}')">📋 Con aviso</button>
+            <button class="estado-pill" data-estado="Ausente sin aviso" onclick="setEstado(this,'${ag.id}')">✗ Sin aviso</button>
+            <button class="estado-pill" data-estado="Justificado" onclick="setEstado(this,'${ag.id}')">📄 Justif.</button>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn-primary" onclick="guardarSesionCal()">Guardar sesión</button>
+    </div>`);
+  document.getElementById('ns-tema').onchange=function(){if(this.value==='__nuevo__')showAddTema(this);};
 }
 
-function showAddTrent(fechaPre){
-  const temaOpts=TEMARIO.map(t=>`<option value="${t.id}">${t.id} · ${t.nombre}</option>`).join('');
-  const isoF=fechaPre?fToIso(fechaPre):'';
-  const ex=fechaPre?TRENTS.find(t=>t.fecha===fechaPre):null;
-  openModal(`<div class="modal-title">Trent</div>
-    <div class="form-group" style="margin-bottom:10px"><label class="form-label">Fecha (miércoles)</label><input type="date" class="form-input" id="tr-fecha" value="${isoF}"></div>
-    <div class="form-group" style="margin-bottom:10px"><label class="form-label">Tema</label>
-      <select class="form-select" id="tr-tema"><option value="">— Seleccionar —</option>${temaOpts}<option value="__nuevo__">＋ Agregar nuevo tema</option></select></div>
-    <div class="form-group"><label class="form-label">Notas</label><input type="text" class="form-input" id="tr-notas" value="${ex?ex.notas:''}" placeholder="Opcional"></div>
-    <div class="modal-footer"><button class="btn-secondary" onclick="closeModal()">Cancelar</button><button class="btn-primary" onclick="guardarTrent()">Guardar</button></div>`);
-  if(ex)document.getElementById('tr-tema').value=ex.temaId;
-  document.getElementById('tr-tema').onchange=function(){if(this.value==='__nuevo__')showAddTema(this);};
+function setEstado(btn, agId){
+  // Toggle: if already active, deactivate
+  const pills=btn.closest('.estado-pills').querySelectorAll('.estado-pill');
+  pills.forEach(p=>{
+    p.className='estado-pill';
+  });
+  btn.className='estado-pill active-'+btn.dataset.estado.toLowerCase().replace(/ /g,'-').replace(/[óí]/g, c=>c==='ó'?'o':'i');
+  // Map to css class
+  const estadoClassMap={
+    'Asistió':'active-asistio',
+    'Llegó tarde':'active-tarde',
+    'Ausente con aviso':'active-ausente-aviso',
+    'Ausente sin aviso':'active-ausente-sin',
+    'Justificado':'active-justificado',
+  };
+  btn.className='estado-pill '+(estadoClassMap[btn.dataset.estado]||'');
 }
-function guardarTrent(){
-  const iso=document.getElementById('tr-fecha').value,temaId=document.getElementById('tr-tema').value,notas=document.getElementById('tr-notas').value;
-  if(!iso||!temaId||temaId==='__nuevo__'){alert('Completá fecha y tema');return;}
-  const fecha=isoToF(iso),uid=Math.random().toString(36).slice(2,10);
-  TRENTS=TRENTS.filter(t=>t.fecha!==fecha);
-  TRENTS.push({id:uid,fecha,temaId,notas});
-  sheetPost({rows:[[uid,fecha,temaId,notas]],sheet:'Calendario_Trents'});
-  closeModal();renderCalendar();toast('✓ Trent guardado');
+
+function guardarSesionCal(){
+  const temaId=document.getElementById('ns-tema').value;
+  const fechaIso=document.getElementById('ns-fecha').value;
+  if(!temaId||temaId==='__nuevo__'){toast('Seleccioná un tema','err');return;}
+  if(!fechaIso){toast('Seleccioná una fecha','err');return;}
+  const fecha=isoToF(fechaIso);
+
+  // Collect estados
+  const rows=[];
+  const inasistRows=[];
+  document.querySelectorAll('#ns-agentes-list .asist-estado-row').forEach(row=>{
+    const agId=row.dataset.agid;
+    const activeBtn=row.querySelector('.estado-pill[class*="active-"]');
+    const estado=activeBtn?activeBtn.dataset.estado:'Asistió';
+
+    if(estado==='Asistió'||estado==='Llegó tarde'){
+      // Check not already registered
+      const yaReg=(CAPS[agId]||[]).some(c=>c.tema===temaId&&c.fecha===fecha);
+      if(!yaReg){
+        const uid=Math.random().toString(36).slice(2,10);
+        rows.push([uid,agId,temaId,fecha,estado]);
+        if(!CAPS[agId])CAPS[agId]=[];
+        CAPS[agId].push({id:uid,tema:temaId,fecha,estado});
+      }
+    } else {
+      // Register as inasistencia
+      const yaReg=INASISTENCIAS.some(i=>i.agId===agId&&i.temaId===temaId&&i.fecha===fecha);
+      if(!yaReg){
+        const uid=Math.random().toString(36).slice(2,10);
+        inasistRows.push([uid,agId,temaId,fecha,estado]);
+        INASISTENCIAS.push({id:uid,agId,temaId,fecha,motivo:estado});
+      }
+    }
+  });
+
+  if(rows.length) sheetPost({rows,sheet:'Registro_Capacitaciones'});
+  if(inasistRows.length) sheetPost({rows:inasistRows,sheet:'Inasistencias'});
+
+  closeModal();
+  renderCalendar();
+  toast(`✓ Sesión guardada · ${rows.length} asistencias · ${inasistRows.length} ausencias`);
+}
+
+// ── VER SESIÓN EXISTENTE ──
+function showSessionModal(ds){
+  const {fecha,temaId}=JSON.parse(decodeURIComponent(ds));
+  const tema=TEMARIO.find(t=>t.id===temaId);
+  const session=SESIONES_CAL.find(s=>s.fecha===fecha&&s.temaId===temaId);
+  if(!session) return;
+
+  const estadoColor={'Asistió':'var(--verde)','Llegó tarde':'var(--purpura)','Ausente con aviso':'var(--dorado)','Ausente sin aviso':'var(--rojo)','Justificado':'var(--azul)'};
+
+  const agList=Object.entries(session.asistencia).map(([agId,estado])=>{
+    const ag=AGENTES.find(a=>a.id===agId);
+    const cc=CAT_CFG[ag?ag.cat:'Agente']||{bg:'#888'};
+    const color=estadoColor[estado]||'var(--text3)';
+    return `<div class="asist-estado-row">
+      <div class="av" style="background:${cc.bg}22;color:${cc.bg};flex-shrink:0">${ag?initials(ag.nombre):'?'}</div>
+      <span class="asist-ag-name">${ag?ag.nombre.split(' ').slice(0,2).join(' '):agId}</span>
+      <span style="font-size:11px;font-weight:500;color:${color};padding:2px 8px;background:${color}18;border-radius:10px">${estado}</span>
+    </div>`;
+  }).join('');
+
+  const asistieron=Object.values(session.asistencia).filter(e=>e==='Asistió'||e==='Llegó tarde').length;
+  const total=Object.keys(session.asistencia).length;
+
+  openModal(`
+    <div class="modal-title">${tema?tema.nombre:temaId}</div>
+    <div class="info-block" style="margin-bottom:10px;display:flex;gap:12px">
+      <div><div class="info-label">Fecha</div><div class="info-val">${fecha}</div></div>
+      <div><div class="info-label">Asistencia</div><div class="info-val" style="color:var(--verde)">${asistieron}/${total}</div></div>
+    </div>
+    <div style="font-size:12px;font-weight:500;color:var(--text2);margin-bottom:8px">Detalle por agente</div>
+    <div style="max-height:300px;overflow-y:auto">${agList||'<div style="color:var(--text3);font-size:12px">Sin registros</div>'}</div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal();showNewSessionModal('${fecha}')">Editar sesión</button>
+      <button class="btn-primary" onclick="closeModal()">Cerrar</button>
+    </div>`);
 }
 
 function showAddFeriado(){
