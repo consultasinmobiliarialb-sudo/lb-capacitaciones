@@ -986,111 +986,44 @@ function showNewSessionModal(fechaStr){
     const hoy=new Date();
     fechaStr=getFStr(hoy.getFullYear(),hoy.getMonth(),hoy.getDate());
   }
-  const temaOpts=TEMARIO.map(t=>`<option value="${t.id}">${t.id} · ${t.nombre}</option>`).join('');
+  const temaOpts=TEMARIO.map(t=>'<option value="'+t.id+'">'+t.id+' · '+t.nombre+'</option>').join('');
   const isoFecha=fToIso(fechaStr);
-  // Filter active agents
   const activos=AGENTES.filter(a=>a.estadoRel!=='Baja');
 
-  openModal(`
-    <div class="modal-title">Nueva sesión — ${fechaStr}</div>
-    <div class="form-row" style="margin-bottom:12px">
-      <div class="form-group">
-        <label class="form-label">Fecha</label>
-        <input type="date" class="form-input" id="ns-fecha" value="${isoFecha}" onchange="updateNewSessionDate(this.value)">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Tema</label>
-        <select class="form-select" id="ns-tema">
-          <option value="">— Seleccionar —</option>
-          ${temaOpts}
-          <option value="__nuevo__">＋ Agregar nuevo tema</option>
-        </select>
-      </div>
-    </div>
-    <div style="font-size:12px;font-weight:500;color:var(--text2);margin-bottom:8px">Asistencia por agente</div>
-    <div id="ns-agentes-list">
-      ${activos.map(ag=>{
-        const cc=CAT_CFG[ag.cat]||{bg:'#888'};
-        return `<div class="asist-estado-row" data-agid="${ag.id}">
-          <div class="av" style="background:${cc.bg}22;color:${cc.bg};flex-shrink:0">${initials(ag.nombre)}</div>
-          <span class="asist-ag-name">${ag.nombre.split(' ').slice(0,2).join(' ')}</span>
-          <div class="estado-pills">
-            <button class="estado-pill active-asistio" data-estado="Asistió" onclick="setEstado(this,'${ag.id}')">✓ Asistió</button>
-            <button class="estado-pill" data-estado="Llegó tarde" onclick="setEstado(this,'${ag.id}')">⏱ Tarde</button>
-            <button class="estado-pill" data-estado="Ausente con aviso" onclick="setEstado(this,'${ag.id}')">📋 Con aviso</button>
-            <button class="estado-pill" data-estado="Ausente sin aviso" onclick="setEstado(this,'${ag.id}')">✗ Sin aviso</button>
-            <button class="estado-pill" data-estado="Justificado" onclick="setEstado(this,'${ag.id}')">📄 Justif.</button>
-          </div>
-        </div>`;
-      }).join('')}
-    </div>
-    <div class="modal-footer">
-      <button class="btn-secondary" onclick="closeModal()">Cancelar</button>
-      <button class="btn-primary" onclick="guardarSesionCal()">Guardar sesión</button>
-    </div>`);
+  const agRows = activos.map(ag=>{
+    const cc=CAT_CFG[ag.cat]||{bg:'#888'};
+    return '<div class="asist-estado-row" data-agid="'+ag.id+'">'
+      +'<div class="av" style="background:'+cc.bg+'22;color:'+cc.bg+';flex-shrink:0">'+initials(ag.nombre)+'</div>'
+      +'<span class="asist-ag-name">'+ag.nombre.split(' ').slice(0,2).join(' ')+'</span>'
+      +'<div class="estado-pills">'
+      +'<button class="estado-pill active-asistio" data-estado="Asistió" onclick="setEstado(this)">✓ Asistió</button>'
+      +'<button class="estado-pill" data-estado="Llegó tarde" onclick="setEstado(this)">⏱ Tarde</button>'
+      +'<button class="estado-pill" data-estado="Ausente con aviso" onclick="setEstado(this)">📋 Con aviso</button>'
+      +'<button class="estado-pill" data-estado="Ausente sin aviso" onclick="setEstado(this)">✗ Sin aviso</button>'
+      +'<button class="estado-pill" data-estado="Justificado" onclick="setEstado(this)">📄 Justif.</button>'
+      +'</div></div>';
+  }).join('');
+
+  openModal(
+    '<div class="modal-title">Sesión — '+fechaStr+'</div>'
+    +'<div class="form-row" style="margin-bottom:12px">'
+    +'<div class="form-group"><label class="form-label">Fecha</label>'
+    +'<input type="date" class="form-input" id="ns-fecha" value="'+isoFecha+'"></div>'
+    +'<div class="form-group"><label class="form-label">Tema</label>'
+    +'<select class="form-select" id="ns-tema">'
+    +'<option value="">— Seleccionar —</option>'+temaOpts
+    +'<option value="__nuevo__">＋ Agregar nuevo tema</option>'
+    +'</select></div></div>'
+    +'<div style="font-size:12px;font-weight:500;color:var(--text2);margin-bottom:8px">Estado por agente</div>'
+    +'<div id="ns-agentes-list" style="max-height:320px;overflow-y:auto">'+agRows+'</div>'
+    +'<div class="modal-footer">'
+    +'<button class="btn-secondary" onclick="closeModal()">Cancelar</button>'
+    +'<button class="btn-primary" onclick="guardarSesionCal()">Guardar sesión</button>'
+    +'</div>'
+  );
   document.getElementById('ns-tema').onchange=function(){if(this.value==='__nuevo__')showAddTema(this);};
 }
 
-function setEstado(btn, agId){
-  // Toggle: if already active, deactivate
-  const pills=btn.closest('.estado-pills').querySelectorAll('.estado-pill');
-  pills.forEach(p=>{
-    p.className='estado-pill';
-  });
-  btn.className='estado-pill active-'+btn.dataset.estado.toLowerCase().replace(/ /g,'-').replace(/[óí]/g, c=>c==='ó'?'o':'i');
-  // Map to css class
-  const estadoClassMap={
-    'Asistió':'active-asistio',
-    'Llegó tarde':'active-tarde',
-    'Ausente con aviso':'active-ausente-aviso',
-    'Ausente sin aviso':'active-ausente-sin',
-    'Justificado':'active-justificado',
-  };
-  btn.className='estado-pill '+(estadoClassMap[btn.dataset.estado]||'');
-}
-
-function guardarSesionCal(){
-  const temaId=document.getElementById('ns-tema').value;
-  const fechaIso=document.getElementById('ns-fecha').value;
-  if(!temaId||temaId==='__nuevo__'){toast('Seleccioná un tema','err');return;}
-  if(!fechaIso){toast('Seleccioná una fecha','err');return;}
-  const fecha=isoToF(fechaIso);
-
-  // Collect estados
-  const rows=[];
-  const inasistRows=[];
-  document.querySelectorAll('#ns-agentes-list .asist-estado-row').forEach(row=>{
-    const agId=row.dataset.agid;
-    const activeBtn=row.querySelector('.estado-pill[class*="active-"]');
-    const estado=activeBtn?activeBtn.dataset.estado:'Asistió';
-
-    if(estado==='Asistió'||estado==='Llegó tarde'){
-      // Check not already registered
-      const yaReg=(CAPS[agId]||[]).some(c=>c.tema===temaId&&c.fecha===fecha);
-      if(!yaReg){
-        const uid=Math.random().toString(36).slice(2,10);
-        rows.push([uid,agId,temaId,fecha,estado]);
-        if(!CAPS[agId])CAPS[agId]=[];
-        CAPS[agId].push({id:uid,tema:temaId,fecha,estado});
-      }
-    } else {
-      // Register as inasistencia
-      const yaReg=INASISTENCIAS.some(i=>i.agId===agId&&i.temaId===temaId&&i.fecha===fecha);
-      if(!yaReg){
-        const uid=Math.random().toString(36).slice(2,10);
-        inasistRows.push([uid,agId,temaId,fecha,estado]);
-        INASISTENCIAS.push({id:uid,agId,temaId,fecha,motivo:estado});
-      }
-    }
-  });
-
-  if(rows.length) sheetPost({rows,sheet:'Registro_Capacitaciones'});
-  if(inasistRows.length) sheetPost({rows:inasistRows,sheet:'Inasistencias'});
-
-  closeModal();
-  renderCalendar();
-  toast(`✓ Sesión guardada · ${rows.length} asistencias · ${inasistRows.length} ausencias`);
-}
 
 // ── VER SESIÓN EXISTENTE ──
 function showSessionModal(ds){
@@ -1144,6 +1077,53 @@ function guardarFeriado(){
   sheetPost({rows:[[uid,fecha,motivo]],sheet:'Calendario_Feriados'});
   closeModal();renderCalendar();toast('✓ Feriado marcado');
 }
+
+function setEstado(btn){
+  const pills=btn.closest('.estado-pills').querySelectorAll('.estado-pill');
+  pills.forEach(p=>{ p.className='estado-pill'; });
+  const map={'Asistió':'active-asistio','Llegó tarde':'active-tarde','Ausente con aviso':'active-ausente-aviso','Ausente sin aviso':'active-ausente-sin','Justificado':'active-justificado'};
+  btn.className='estado-pill '+(map[btn.dataset.estado]||'');
+}
+
+function guardarSesionCal(){
+  const temaId=document.getElementById('ns-tema').value;
+  const fechaIso=document.getElementById('ns-fecha').value;
+  if(!temaId||temaId==='__nuevo__'){toast('Seleccioná un tema','err');return;}
+  if(!fechaIso){toast('Seleccioná una fecha','err');return;}
+  const fecha=isoToF(fechaIso);
+
+  const rows=[], inasistRows=[];
+  document.querySelectorAll('#ns-agentes-list .asist-estado-row').forEach(row=>{
+    const agId=row.dataset.agid;
+    const activeBtn=row.querySelector('.estado-pill[class*="active-"]');
+    const estado=activeBtn?activeBtn.dataset.estado:'Asistió';
+    if(estado==='Asistió'||estado==='Llegó tarde'){
+      const yaReg=(CAPS[agId]||[]).some(c=>c.tema===temaId&&c.fecha===fecha);
+      if(!yaReg){
+        const uid=Math.random().toString(36).slice(2,10);
+        rows.push([uid,agId,temaId,fecha,estado]);
+        if(!CAPS[agId])CAPS[agId]=[];
+        CAPS[agId].push({id:uid,tema:temaId,fecha,estado});
+      }
+    } else {
+      const yaReg=INASISTENCIAS.some(i=>i.agId===agId&&i.temaId===temaId&&i.fecha===fecha);
+      if(!yaReg){
+        const uid=Math.random().toString(36).slice(2,10);
+        inasistRows.push([uid,agId,temaId,fecha,estado]);
+        INASISTENCIAS.push({id:uid,agId,temaId,fecha,motivo:estado});
+      }
+    }
+  });
+
+  if(rows.length) sheetPost({rows,sheet:'Registro_Capacitaciones'});
+  if(inasistRows.length) sheetPost({rows:inasistRows,sheet:'Inasistencias'});
+
+  closeModal();
+  buildSesionesCal();
+  renderCalendar();
+  toast('✓ Sesión guardada · '+rows.length+' asistencias · '+inasistRows.length+' ausencias');
+}
+
 
 
 // ════════════════════════════════════
