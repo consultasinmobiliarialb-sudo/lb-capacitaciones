@@ -752,14 +752,30 @@ function guardarAsist(temaId,fecha){
 
 // ── NUEVO TEMA ──
 function showAddTema(sel){
-  const opts=['2. Negocio','4. Técnica','5. Expansión'].map(f=>`<option value="${f}">${f}</option>`).join('');
-  openModal(`<div class="modal-title">Agregar nuevo tema</div>
-    <div class="form-group" style="margin-bottom:10px"><label class="form-label">Nombre</label><input type="text" class="form-input" id="nt-nombre" placeholder="Ej: Fotografía Inmobiliaria"></div>
-    <div class="form-row" style="margin-bottom:4px">
-      <div class="form-group"><label class="form-label">Fase</label><select class="form-select" id="nt-fase">${opts}</select></div>
-      <div class="form-group"><label class="form-label">¿Obligatorio?</label><select class="form-select" id="nt-oblig"><option value="NO">No</option><option value="SI">Sí</option></select></div>
-    </div>
-    <div class="modal-footer"><button class="btn-secondary" onclick="closeModal();if(document.getElementById('sel-tema'))document.getElementById('sel-tema').value=''">Cancelar</button><button class="btn-primary" onclick="guardarNuevoTema()">Agregar</button></div>`);
+  const opts=['2. Negocio','4. Técnica','5. Expansión'].map(f=>'<option value="'+f+'">'+f+'</option>').join('');
+  openModal(
+    '<div class="modal-title">Agregar nuevo tema</div>'
+    +'<div class="form-group" style="margin-bottom:10px"><label class="form-label">Nombre</label>'
+    +'<input type="text" class="form-input" id="nt-nombre" placeholder="Ej: Fotografia Inmobiliaria"></div>'
+    +'<div class="form-row" style="margin-bottom:4px">'
+    +'<div class="form-group"><label class="form-label">Fase</label>'
+    +'<select class="form-select" id="nt-fase">'+opts+'</select></div>'
+    +'<div class="form-group"><label class="form-label">Obligatorio?</label>'
+    +'<select class="form-select" id="nt-oblig"><option value="NO">No</option><option value="SI">Si</option></select></div>'
+    +'</div>'
+    +'<div class="modal-footer">'
+    +'<button class="btn-secondary" onclick="cancelAddTema()">Cancelar</button>'
+    +'<button class="btn-primary" onclick="guardarNuevoTema()">Agregar</button>'
+    +'</div>'
+  );
+}
+
+function cancelAddTema(){
+  closeModal();
+  const st = document.getElementById("sel-tema");
+  const nt = document.getElementById("ns-tema");
+  if(st) st.value="";
+  if(nt) nt.value="";
 }
 function guardarNuevoTema(){
   const nombre=document.getElementById('nt-nombre').value.trim();
@@ -857,12 +873,12 @@ function renderMonthly(){
     }
 
     const cellCls = isWeekend?'weekend':isHoy?'today':'';
-    const clickHandler = isWeekend||feriado?'':` onclick="showNewSessionModal('${fechaStr}')"`;
-    gridHTML+=`<div class="cal-cell ${cellCls}"${clickHandler}>
-      <div class="cal-day-num">${d}</div>
-      ${evHTML}
-      ${!isWeekend&&!feriado?'<div class="cal-add-hint">+ sesión</div>':''}
-    </div>`;
+    const clickHandler = isWeekend||feriado?'':' onclick="showNewSessionModal(\''+fechaStr+'\')"';
+    gridHTML+='<div class="cal-cell '+cellCls+'"'+clickHandler+'>'
+      +'<div class="cal-day-num">'+d+'</div>'
+      +evHTML
+      +(!isWeekend&&!feriado?'<div class="cal-add-hint">+ sesión</div>':'')
+      +'</div>';
   }
 
   const rem=(firstDow+daysInMonth)%7===0?0:7-(firstDow+daysInMonth)%7;
@@ -926,10 +942,10 @@ function renderWeekly(){
       if(!feriado) content+=`<div class="cal-add-hint" style="opacity:1;padding:4px;color:var(--text4)">+ sesión</div>`;
     }
 
-    return `<div class="cal-cell${isHoy?' today':''}" style="min-height:120px;padding:6px" 
-      onclick="${feriado?'':'showNewSessionModal(''+fechaStr+'')'}">
-      ${content}
-    </div>`;
+    const onclickAttr = feriado ? '' : ' onclick="showNewSessionModal(\''+fechaStr+'\')"';
+    return '<div class="cal-cell'+(isHoy?' today':'')+'" style="min-height:120px;padding:6px"'+onclickAttr+'>'
+      + content
+      + '</div>';
   }).join('');
 
   document.getElementById('cal-shell').innerHTML=`
@@ -941,21 +957,20 @@ function renderWeekly(){
 
 function buildCalTopbar(subtitle){
   const title = subtitle||MESES[calMonth]+' '+calYear;
-  return `<div class="cal-topbar">
-    <button class="cal-nav-btn" onclick="calNav(-1)">‹</button>
-    <div>
-      <div class="cal-title">${title}</div>
-    </div>
-    <button class="cal-nav-btn" onclick="calNav(1)">›</button>
-    <div class="cal-view-toggle" style="margin-left:8px">
-      <button class="cal-view-btn${calView==='monthly'?' active':''}" onclick="setCalView('monthly')">Mes</button>
-      <button class="cal-view-btn${calView==='weekly'?' active':''}" onclick="setCalView('weekly')">Semana</button>
-    </div>
-    <button class="btn-secondary" style="font-size:12px;padding:5px 12px" onclick="showAddFeriado()">+ Feriado</button>
-    <button class="btn-primary" style="font-size:12px;padding:5px 12px" onclick="showNewSessionModal('')">+ Sesión</button>
-  </div>`;
+  const mActive = calView==='monthly'?' active':'';
+  const wActive = calView==='weekly'?' active':'';
+  return '<div class="cal-topbar">'
+    +'<button class="cal-nav-btn" onclick="calNav(-1)">‹</button>'
+    +'<div><div class="cal-title">'+title+'</div></div>'
+    +'<button class="cal-nav-btn" onclick="calNav(1)">›</button>'
+    +'<div class="cal-view-toggle" style="margin-left:8px">'
+    +'<button class="cal-view-btn'+mActive+'" onclick="setCalView(\'monthly\')">Mes</button>'
+    +'<button class="cal-view-btn'+wActive+'" onclick="setCalView(\'weekly\')">Semana</button>'
+    +'</div>'
+    +'<button class="btn-secondary" style="font-size:12px;padding:5px 12px" onclick="showAddFeriado()">+ Feriado</button>'
+    +'<button class="btn-primary" style="font-size:12px;padding:5px 12px" onclick="showNewSessionModal(\'\')">+ Sesión</button>'
+    +'</div>';
 }
-
 function buildCalLegend(){
   return `<div class="cal-legend">
     <div class="leg-item"><div class="leg-dot" style="background:#1F6C43"></div>Con asistencia</div>
@@ -1038,30 +1053,35 @@ function showSessionModal(ds){
     const ag=AGENTES.find(a=>a.id===agId);
     const cc=CAT_CFG[ag?ag.cat:'Agente']||{bg:'#888'};
     const color=estadoColor[estado]||'var(--text3)';
-    return `<div class="asist-estado-row">
-      <div class="av" style="background:${cc.bg}22;color:${cc.bg};flex-shrink:0">${ag?initials(ag.nombre):'?'}</div>
-      <span class="asist-ag-name">${ag?ag.nombre.split(' ').slice(0,2).join(' '):agId}</span>
-      <span style="font-size:11px;font-weight:500;color:${color};padding:2px 8px;background:${color}18;border-radius:10px">${estado}</span>
-    </div>`;
+    return '<div class="asist-estado-row">'
+      +'<div class="av" style="background:'+cc.bg+'22;color:'+cc.bg+';flex-shrink:0">'+( ag?initials(ag.nombre):'?')+'</div>'
+      +'<span class="asist-ag-name">'+(ag?ag.nombre.split(' ').slice(0,2).join(' '):agId)+'</span>'
+      +'<span style="font-size:11px;font-weight:500;color:'+color+';padding:2px 8px;background:'+color+'18;border-radius:10px">'+estado+'</span>'
+      +'</div>';
   }).join('');
 
   const asistieron=Object.values(session.asistencia).filter(e=>e==='Asistió'||e==='Llegó tarde').length;
   const total=Object.keys(session.asistencia).length;
+  const encodedFecha=encodeURIComponent(fecha);
 
-  openModal(`
-    <div class="modal-title">${tema?tema.nombre:temaId}</div>
-    <div class="info-block" style="margin-bottom:10px;display:flex;gap:12px">
-      <div><div class="info-label">Fecha</div><div class="info-val">${fecha}</div></div>
-      <div><div class="info-label">Asistencia</div><div class="info-val" style="color:var(--verde)">${asistieron}/${total}</div></div>
-    </div>
-    <div style="font-size:12px;font-weight:500;color:var(--text2);margin-bottom:8px">Detalle por agente</div>
-    <div style="max-height:300px;overflow-y:auto">${agList||'<div style="color:var(--text3);font-size:12px">Sin registros</div>'}</div>
-    <div class="modal-footer">
-      <button class="btn-secondary" onclick="closeModal();showNewSessionModal('${fecha}')">Editar sesión</button>
-      <button class="btn-primary" onclick="closeModal()">Cerrar</button>
-    </div>`);
+  openModal(
+    '<div class="modal-title">'+(tema?tema.nombre:temaId)+'</div>'
+    +'<div class="info-block" style="margin-bottom:10px;display:flex;gap:12px">'
+    +'<div><div class="info-label">Fecha</div><div class="info-val">'+fecha+'</div></div>'
+    +'<div><div class="info-label">Asistencia</div><div class="info-val" style="color:var(--verde)">'+asistieron+'/'+total+'</div></div>'
+    +'</div>'
+    +'<div style="font-size:12px;font-weight:500;color:var(--text2);margin-bottom:8px">Detalle por agente</div>'
+    +'<div style="max-height:300px;overflow-y:auto">'+(agList||'<div style="color:var(--text3);font-size:12px">Sin registros</div>')+'</div>'
+    +'<div class="modal-footer">'
+    +'<button class="btn-secondary" onclick="closeModal();editSession(this)" data-fecha="'+fecha+'">Editar sesión</button>'
+    +'<button class="btn-primary" onclick="closeModal()">Cerrar</button>'
+    +'</div>'
+  );
 }
 
+
+
+function editSession(btn){ closeModal(); showNewSessionModal(btn.dataset.fecha); }
 function showAddFeriado(){
   openModal(`<div class="modal-title">Feriado / Cancelación</div>
     <div class="form-group" style="margin-bottom:10px"><label class="form-label">Fecha</label><input type="date" class="form-input" id="fer-fecha"></div>
